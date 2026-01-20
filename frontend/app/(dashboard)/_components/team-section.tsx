@@ -1,8 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar } from '@/components/ui/avatar'; // Need to create Avatar component
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
