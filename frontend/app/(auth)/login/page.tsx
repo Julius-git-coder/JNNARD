@@ -130,18 +130,11 @@ export default function LoginPage() {
                                 />
                                 <label htmlFor="remember" className="text-sm font-medium leading-none text-gray-700">Remember me</label>
                             </div>
-                            <Link href="#" className="text-sm font-medium text-blue-600 hover:underline">
+                            <Link href="/forgot-password" className="text-sm font-medium text-blue-600 hover:underline">
                                 Forgot Password?
                             </Link>
-                        </div>
-
-                        <Button type="submit" className="w-full h-11 text-base bg-black hover:bg-gray-800 text-white" isLoading={isLoading}>
-                            Log in
-                        </Button>
-
-                        <div className="text-center text-sm text-gray-500">
-                            Don&apos;t have an account?{" "}
-                            <Link href="#" className="font-semibold text-blue-600 hover:underline">
+// ...
+                            <Link href="/signup" className="font-semibold text-blue-600 hover:underline">
                                 Sign up for free
                             </Link>
                         </div>
