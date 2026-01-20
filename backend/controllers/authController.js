@@ -74,11 +74,11 @@ export const verifyEmail = async (req, res) => {
         }
 
         if (user.otp !== otp) {
-            return res.status(400).json({ message: 'Invalid OTP' });
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
 
         if (user.otpExpires < Date.now()) {
-            return res.status(400).json({ message: 'OTP expired' });
+            return res.status(400).json({ message: 'OTP has expired' });
         }
 
         user.isVerified = true;
@@ -99,7 +99,11 @@ export const verifyEmail = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Verification Error:", error);
+        res.status(500).json({
+            message: 'Verification failed. Please try again.',
+            debug: error.message
+        });
     }
 };
 
