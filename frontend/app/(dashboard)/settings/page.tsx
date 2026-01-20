@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, Upload, User as UserIcon, Loader2, Save } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function SettingsPage() {
     const [user, setUser] = useState<any>(null);
