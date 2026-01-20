@@ -24,7 +24,6 @@ export default function SignupPage() {
         setIsLoading(true);
         setError(null);
 
-        // Validation
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match.");
             setIsLoading(false);
@@ -37,12 +36,34 @@ export default function SignupPage() {
             return;
         }
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log("Signup successful");
-            // Redirect to verify
+        try {
+            const data = new FormData();
+            data.append('name', formData.fullName);
+            data.append('email', formData.email);
+            data.append('password', formData.password);
+
+            // Note: Avatar upload input would go here, appending to 'avatar' key if implemented in UI.
+
+            const response = await fetch('http://localhost:5000/api/auth/register', {
+                method: 'POST',
+                body: data,
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Signup failed');
+            }
+
+            console.log("Signup successful", result);
+            // Redirect to verify with email param
             window.location.href = '/verify?email=' + encodeURIComponent(formData.email);
-        }, 1500);
+
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

@@ -20,21 +20,41 @@ function VerifyContent() {
         setIsLoading(true);
         setError(null);
 
-        console.log("Verifying OTP:", otp);
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, otp }),
+            });
 
-        // Simulate API verification
-        setTimeout(() => {
-            if (otp === "1234") { // Mock valid OTP
-                if (mode === 'reset') {
-                    window.location.href = '/reset-password';
-                } else {
-                    window.location.href = '/dashboard';
-                }
-            } else {
-                setError("Invalid code. Try '1234'");
-                setIsLoading(false);
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Verification failed');
             }
-        }, 1500);
+
+            // Save tokens if returned (which they are) to local storage or context
+            if (result.accessToken) {
+                localStorage.setItem('accessToken', result.accessToken);
+                localStorage.setItem('user', JSON.stringify({ name: result.name, email: result.email, avatar: result.avatar }));
+            }
+
+            if (mode === 'reset') {
+                // For reset flow, we need to pass the OTP to the next step or use a temp token. 
+                // The backend uses the OTP validation in the reset endpoint too, so we just redirect.
+                // Ideally for security, we'd exchange OTP for a reset token, but per current controller design:
+                window.location.href = `/reset-password?email=${encodeURIComponent(email)}&otp=${otp}`;
+            } else {
+                window.location.href = '/dashboard';
+            }
+
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

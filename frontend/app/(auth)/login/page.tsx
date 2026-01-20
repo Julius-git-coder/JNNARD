@@ -20,27 +20,36 @@ export default function LoginPage() {
         setIsLoading(true);
         setError(null);
 
-        // Simulate API call
-        setTimeout(() => {
-            // Simple validation for demo
-            if (email === 'demo@jnnard.com' && password === 'password') {
-                console.log("Login successful");
-                // In a real app, you'd redirect here, e.g., router.push('/dashboard')
-            } else {
-                // Show error state demo
-                setIsLoading(false);
-                // Uncomment to test success flow: 
-                // window.location.href = '/dashboard'; 
-                // For now, let's just finish the "loading" simulation:
-                if (email && password) {
-                    // Fake success for now to proceed to dashboard integration later
-                    window.location.href = '/dashboard';
-                } else {
-                    setError("Please fill in all fields.");
-                }
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Login failed');
             }
+
+            // Save authentication data
+            localStorage.setItem('accessToken', result.accessToken);
+            if (result.refreshToken) localStorage.setItem('refreshToken', result.refreshToken);
+            localStorage.setItem('user', JSON.stringify({
+                name: result.name,
+                email: result.email,
+                avatar: result.avatar
+            }));
+
+            console.log("Login successful");
+            window.location.href = '/dashboard';
+
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
             setIsLoading(false);
-        }, 2000);
+        }
     };
 
     return (
@@ -133,7 +142,14 @@ export default function LoginPage() {
                             <Link href="/forgot-password" className="text-sm font-medium text-blue-600 hover:underline">
                                 Forgot Password?
                             </Link>
-// ...
+                        </div>
+
+                        <Button type="submit" className="w-full h-11 text-base bg-black hover:bg-gray-800 text-white" isLoading={isLoading}>
+                            Log in
+                        </Button>
+
+                        <div className="text-center text-sm text-gray-500">
+                            Don&apos;t have an account?{" "}
                             <Link href="/signup" className="font-semibold text-blue-600 hover:underline">
                                 Sign up for free
                             </Link>
