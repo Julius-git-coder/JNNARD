@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, UserPlus, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function SignupPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -17,21 +18,19 @@ export default function SignupPage() {
         confirmPassword: '',
         terms: false
     });
-    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setError(null);
 
         if (formData.password !== formData.confirmPassword) {
-            setError("Passwords do not match.");
+            toast.error("Passwords do not match.");
             setIsLoading(false);
             return;
         }
 
         if (!formData.terms) {
-            setError("You must agree to the Terms and Conditions.");
+            toast.error("You must agree to the Terms and Conditions.");
             setIsLoading(false);
             return;
         }
@@ -41,8 +40,6 @@ export default function SignupPage() {
             data.append('name', formData.fullName);
             data.append('email', formData.email);
             data.append('password', formData.password);
-
-            // Note: Avatar upload input would go here, appending to 'avatar' key if implemented in UI.
 
             const response = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
@@ -55,45 +52,40 @@ export default function SignupPage() {
                 throw new Error(result.message || 'Signup failed');
             }
 
-            console.log("Signup successful", result);
+            toast.success("Signup successful! Please verify your email.");
             // Redirect to verify with email param
             window.location.href = '/verify?email=' + encodeURIComponent(formData.email);
 
         } catch (err: any) {
-            setError(err.message);
+            toast.error(err.message);
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="flex min-h-screen w-full flex-col lg:flex-row bg-white dark:bg-gray-950">
-            {/* Left Section - Illustration (Same as Login for consistency) */}
-            <div className="flex-1 hidden lg:flex flex-col items-center justify-center bg-blue-600 p-12 text-white relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-500 rounded-full blur-3xl opacity-50"></div>
-                <div className="absolute top-24 right-12 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
+        <div className="flex min-h-screen w-full flex-col lg:flex-row bg-white dark:bg-gray-950 relative">
+            {/* Logo top-left of the screen */}
+            <div className="absolute top-8 left-8 flex items-center gap-2 font-bold text-xl z-10">
+                <img src="/Dot.png" alt="Logo" className="h-8 w-8" />
+                <span>JNARD System</span>
+            </div>
 
-                <div className="relative z-10 text-center max-w-lg">
-                    <div className="mb-10 relative mx-auto w-64 h-80 bg-blue-500/30 rounded-2xl border border-blue-400/30 flex items-center justify-center backdrop-blur-sm shadow-2xl">
-                        <UserPlus className="w-24 h-24 text-blue-100 opacity-80" />
-                        <div className="absolute bottom-4 left-0 w-full text-center text-blue-200 text-sm font-mono">JOIN TEAM</div>
-                    </div>
-                    <h1 className="text-4xl font-bold mb-6">Start your journey</h1>
-                    <p className="text-lg text-blue-100">
-                        Join thousands of teams using JNNARD to ship faster and collaborate better.
-                    </p>
-                </div>
+            {/* Left Section - Image */}
+            <div className="hidden lg:flex flex-1 items-center justify-center p-12  dark:bg-gray-900">
+                <img
+                    src="/SignUp.jpeg"
+                    alt="Signup Visual"
+                    className="w-full max-w-xl object-contain"
+                />
             </div>
 
             {/* Right Section - Signup Form */}
-            <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+            <div className="flex-1 flex items-center justify-center p-8 lg:p-12 relative">
+                {/* Logo removed from here */}
+
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-left">
-                        <div className="flex items-center gap-2 mb-2 text-blue-600 font-bold text-xl">
-                            <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white">J</div>
-                            JNARD System
-                        </div>
                         <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-50 mt-8">Create an account</h2>
                         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             Enter your details to get started.
@@ -101,11 +93,6 @@ export default function SignupPage() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6 mt-8">
-                        {error && (
-                            <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md flex items-center gap-2 border border-red-100">
-                                <AlertCircle className="w-4 h-4" /> {error}
-                            </div>
-                        )}
 
                         <div className="space-y-2">
                             <Label htmlFor="fullname">Full Name</Label>
@@ -172,22 +159,22 @@ export default function SignupPage() {
                             <input
                                 type="checkbox"
                                 id="terms"
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                                className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
                                 checked={formData.terms}
                                 onChange={(e) => setFormData({ ...formData, terms: e.target.checked })}
                             />
                             <label htmlFor="terms" className="text-sm text-gray-700">
-                                I agree to the <Link href="#" className="text-blue-600 hover:underline">Terms of Service</Link> and <Link href="#" className="text-blue-600 hover:underline">Privacy Policy</Link>
+                                I agree to the <Link href="#" className="text-black font-semibold hover:underline">Terms of Service</Link> and <Link href="#" className="text-black font-semibold hover:underline">Privacy Policy</Link>
                             </label>
                         </div>
 
-                        <Button type="submit" className="w-full h-11 text-base bg-blue-600 hover:bg-blue-700 text-white" isLoading={isLoading}>
+                        <Button type="submit" className="w-full h-11 text-base bg-black hover:bg-gray-800 text-white" isLoading={isLoading}>
                             Create Account
                         </Button>
 
                         <div className="text-center text-sm text-gray-500">
                             Already have an account?{" "}
-                            <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+                            <Link href="/login" className="font-semibold text-black hover:underline">
                                 Log in
                             </Link>
                         </div>

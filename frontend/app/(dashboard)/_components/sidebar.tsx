@@ -26,7 +26,7 @@ export function Sidebar() {
         <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white dark:bg-gray-950 dark:border-gray-800 hidden md:block">
             <div className="flex h-16 items-center px-6 border-b border-gray-100 dark:border-gray-800">
                 <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-gray-900 dark:text-gray-50">
-                    <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm">J</div>
+                    <img src="/Dot.png" alt="Logo" className="h-8 w-8" />
                     JNARD
                 </Link>
             </div>
