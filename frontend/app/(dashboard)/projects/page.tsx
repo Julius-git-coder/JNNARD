@@ -64,8 +64,8 @@ export default function ProjectsPage() {
                                 title={project.title}
                                 status={project.status}
                                 description={project.description}
-                                dueDate={project.dueDate}
-                                issueCount={project.issues ? project.issues.length : 0}
+                                endDate={project.endDate}
+                                issues={project.issues}
                                 members={project.members}
                                 attachments={project.attachments}
                                 onUpdate={refreshProjects}

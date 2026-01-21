@@ -67,8 +67,13 @@ export const updateProject = async (req, res) => {
                 project.members = req.body.members;
             }
 
-            // Note: Attachments and Issues will likely have their own specific endpoints or logic, 
-            // but can also be updated here generally if passed.
+            if (req.body.attachments) {
+                project.attachments = req.body.attachments;
+            }
+
+            if (req.body.issues) {
+                project.issues = req.body.issues;
+            }
 
             const updatedProject = await project.save();
             const populatedProject = await updatedProject.populate('members', 'name role avatar');

@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, MoreVertical, Paperclip, MessageSquare, Edit2 } from 'lucide-react';
+import { MoreVertical, Paperclip, MessageSquare, Edit2, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AttachmentManager } from './attachment-manager';
+import { IssueManager } from './issue-manager';
+import { CreateProjectDialog } from './create-project-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface ProjectCardProps {
@@ -14,14 +16,14 @@ interface ProjectCardProps {
     title: string;
     status: string;
     description?: string;
-    dueDate?: string;
-    issueCount: number;
+    endDate?: string;
     members: {
         _id: string;
         name: string;
         avatar?: string;
     }[];
     attachments?: any[];
+    issues?: any[];
     onUpdate?: () => void;
 }
 
@@ -30,13 +32,15 @@ export const ProjectCard = ({
     title,
     status,
     description,
-    dueDate,
-    issueCount,
+    endDate,
     members,
     attachments = [],
+    issues = [],
     onUpdate = () => { },
 }: ProjectCardProps) => {
     const [isManageOpen, setIsManageOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isIssuesOpen, setIsIssuesOpen] = useState(false);
 
     const statusVariant =
         status === 'Completed' ? 'default' :
@@ -52,25 +56,48 @@ export const ProjectCard = ({
                         {status}
                     </Badge>
                 </div>
-                <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
-                    <DialogTrigger>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Project Assets: {title}</DialogTitle>
-                        </DialogHeader>
-                        <div className="py-4 space-y-6">
-                            <AttachmentManager
-                                projectId={id}
-                                initialAttachments={attachments}
-                                onUpdate={onUpdate}
-                            />
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                <div className="flex items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => setIsEditOpen(true)}
+                    >
+                        <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
+                        <DialogTrigger>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Project Assets: {title}</DialogTitle>
+                            </DialogHeader>
+                            <div className="py-4 space-y-6">
+                                <AttachmentManager
+                                    projectId={id}
+                                    initialAttachments={attachments}
+                                    onUpdate={onUpdate}
+                                />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+                <CreateProjectDialog
+                    open={isEditOpen}
+                    onOpenChange={setIsEditOpen}
+                    onSuccess={onUpdate}
+                    project={{
+                        _id: id,
+                        title,
+                        description: description || '',
+                        status,
+                        endDate,
+                        members
+                    }}
+                />
             </CardHeader>
             <CardContent className="space-y-4 flex-1 flex flex-col pt-2">
                 <div>
@@ -80,9 +107,9 @@ export const ProjectCard = ({
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 mt-auto uppercase tracking-wider">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span>{dueDate ? new Date(dueDate).toLocaleDateString() : 'No Deadline'}</span>
+                <div className="flex items-center gap-2 text-xs font-semibold mt-auto uppercase tracking-wider">
+                    <Timer className="h-3.5 w-3.5 text-red-500" />
+                    <span className="text-red-500">{endDate ? new Date(endDate).toLocaleDateString() : 'No Deadline'}</span>
                 </div>
             </CardContent>
 
@@ -101,10 +128,26 @@ export const ProjectCard = ({
                             <Paperclip className="h-4 w-4" />
                             <span>{attachments.length}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                            <MessageSquare className="h-4 w-4" />
-                            <span>{issueCount}</span>
-                        </div>
+                        <Dialog open={isIssuesOpen} onOpenChange={setIsIssuesOpen}>
+                            <DialogTrigger>
+                                <button type="button" className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors">
+                                    <MessageSquare className="h-4 w-4" />
+                                    <span>{issues.length}</span>
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Project Messages & Issues: {title}</DialogTitle>
+                                </DialogHeader>
+                                <div className="py-4">
+                                    <IssueManager
+                                        projectId={id}
+                                        initialIssues={issues}
+                                        onUpdate={onUpdate}
+                                    />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
             </CardFooter>

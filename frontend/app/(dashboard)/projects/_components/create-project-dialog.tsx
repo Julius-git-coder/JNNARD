@@ -18,36 +18,72 @@ interface CreateProjectDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess: () => void;
+    project?: {
+        _id: string;
+        title: string;
+        description: string;
+        status: string;
+        endDate?: string;
+        members: { _id: string }[];
+    };
 }
 
-export function CreateProjectDialog({ open, onOpenChange, onSuccess }: CreateProjectDialogProps) {
+export function CreateProjectDialog({ open, onOpenChange, onSuccess, project }: CreateProjectDialogProps) {
+    const isEdit = !!project;
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [status, setStatus] = useState('Active');
+    const [endDate, setEndDate] = useState('');
     const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { workers } = useWorkers();
+
+    React.useEffect(() => {
+        if (open) {
+            if (project) {
+                setTitle(project.title || '');
+                setDescription(project.description || '');
+                setStatus(project.status || 'Active');
+                setEndDate(project.endDate ? project.endDate.split('T')[0] : '');
+                setSelectedMembers(project.members?.map(m => m._id) || []);
+            } else {
+                setTitle('');
+                setDescription('');
+                setStatus('Active');
+                setEndDate('');
+                setSelectedMembers([]);
+            }
+        }
+    }, [open, project]);
+
+    const filteredWorkers = workers.filter(worker =>
+        worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        worker.role.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setIsSubmitting(true);
-            await projectApi.create({
+            const projectData = {
                 title,
                 description,
                 status,
+                endDate,
                 members: selectedMembers,
-            });
+            };
+
+            if (isEdit && project) {
+                await projectApi.update(project._id, projectData);
+            } else {
+                await projectApi.create(projectData);
+            }
             onSuccess();
             onOpenChange(false);
-            // Reset form
-            setTitle('');
-            setDescription('');
-            setStatus('Active');
-            setSelectedMembers([]);
         } catch (error) {
-            console.error("Failed to create project:", error);
+            console.error(isEdit ? "Failed to update project:" : "Failed to create project:", error);
         } finally {
             setIsSubmitting(false);
         }
@@ -65,7 +101,7 @@ export function CreateProjectDialog({ open, onOpenChange, onSuccess }: CreatePro
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Create New Project</DialogTitle>
+                    <DialogTitle>{isEdit ? 'Edit Project' : 'Create New Project'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="space-y-2">
@@ -104,6 +140,15 @@ export function CreateProjectDialog({ open, onOpenChange, onSuccess }: CreatePro
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="deadline">Deadline</Label>
+                            <Input
+                                id="deadline"
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-2">
@@ -126,8 +171,16 @@ export function CreateProjectDialog({ open, onOpenChange, onSuccess }: CreatePro
                                 );
                             })}
                         </div>
+                        <div className="space-y-2">
+                            <Input
+                                placeholder="Search by name or position..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="h-8 text-sm"
+                            />
+                        </div>
                         <div className="border rounded-md max-h-40 overflow-y-auto p-2">
-                            {workers.map(worker => (
+                            {filteredWorkers.map(worker => (
                                 <div
                                     key={worker._id}
                                     className={cn(
@@ -149,14 +202,18 @@ export function CreateProjectDialog({ open, onOpenChange, onSuccess }: CreatePro
                                     {selectedMembers.includes(worker._id) && <Check className="h-4 w-4 text-blue-600" />}
                                 </div>
                             ))}
-                            {workers.length === 0 && <p className="text-xs text-gray-500 text-center py-2">No workers found</p>}
+                            {filteredWorkers.length === 0 && (
+                                <p className="text-xs text-gray-500 text-center py-2">
+                                    {searchTerm ? "No results found" : "No workers found"}
+                                </p>
+                            )}
                         </div>
                     </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                         <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
-                            {isSubmitting ? 'Creating...' : 'Create Project'}
+                            {isSubmitting ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Save Changes' : 'Create Project')}
                         </Button>
                     </DialogFooter>
                 </form>
