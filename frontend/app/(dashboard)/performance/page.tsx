@@ -15,10 +15,10 @@ export default function PerformancePage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Performance Overview</h1>
                 <Button
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                     onClick={() => setIsUpdateDialogOpen(true)}
                 >
                     <Plus className="mr-2 h-4 w-4" /> Record Performance

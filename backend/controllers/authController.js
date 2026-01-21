@@ -38,7 +38,7 @@ export const register = async (req, res) => {
         try {
             await sendEmail({
                 email: user.email,
-                subject: 'JNNARD Email Verification',
+                subject: 'JNARD Email Verification',
                 message,
             });
         } catch (error) {
@@ -164,7 +164,7 @@ export const forgotPassword = async (req, res) => {
 
         await sendEmail({
             email: user.email,
-            subject: 'JNNARD Password Reset Code',
+            subject: 'JNARD Password Reset Code',
             message,
         });
 

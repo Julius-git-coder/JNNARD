@@ -1,4 +1,4 @@
-# JNNARD Code Guide
+# JNARD Code Guide
 
 This guide helps you find the code for each screen in the application. We have organized the folders to match the website's pages.
 
@@ -39,3 +39,6 @@ The code for each page is located inside `frontend/app/`.
 
  **To change the colors:**
    Go to `frontend/app/globals.css`.
+
+   
+kill -9 $(lsof -ti :3000)

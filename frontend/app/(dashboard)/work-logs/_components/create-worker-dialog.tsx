@@ -26,18 +26,20 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
     const { toast } = useToast();
 
     useEffect(() => {
-        if (workerToEdit) {
-            setName(workerToEdit.name);
-            setRole(workerToEdit.role);
-            setStatus(workerToEdit.status);
-            setAvatar(workerToEdit.avatar || '');
-        } else {
-            setName('');
-            setRole('');
-            setStatus('Active');
-            setAvatar('');
+        if (open) {
+            if (workerToEdit) {
+                setName(workerToEdit.name);
+                setRole(workerToEdit.role);
+                setStatus(workerToEdit.status);
+                setAvatar(workerToEdit.avatar || '');
+            } else {
+                setName('');
+                setRole('');
+                setStatus('Active');
+                setAvatar('');
+            }
         }
-    }, [workerToEdit]);
+    }, [open, workerToEdit]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

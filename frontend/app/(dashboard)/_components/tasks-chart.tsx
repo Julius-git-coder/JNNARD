@@ -41,7 +41,7 @@ export function TasksChart({ isLoading: parentLoading }: { isLoading?: boolean }
                 <CardTitle className="text-lg font-bold">Tasks</CardTitle>
                 <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">All Time</Badge>
             </CardHeader>
-            <CardContent className="flex items-center justify-between gap-4">
+            <CardContent className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
                 <div className="h-[250px] w-[250px] relative">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
