@@ -5,11 +5,13 @@ import { TasksChart } from '../_components/tasks-chart';
 import { WorkLogChart } from '../_components/work-log-chart';
 import { ProjectsCard } from '../_components/projects-card';
 import { PerformanceChart } from '../_components/performance-chart';
+import { TeamSection } from '../_components/team-section';
 import { Card } from '@/components/ui/card';
-import Link from 'next/link';
+import { useWorkers } from '@/hooks/useWorkers';
 
 export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
+    const { workers, isLoading: isWorkersLoading } = useWorkers();
 
     useEffect(() => {
         // Simulating loading for the top-level
@@ -38,6 +40,14 @@ export default function DashboardPage() {
                     <PerformanceChart isLoading={isLoading} />
                 </div>
             </div>
+
+            {/* Team Section */}
+            <Card className="p-6 border-gray-200 dark:border-gray-800">
+                <TeamSection
+                    isLoading={isLoading || isWorkersLoading}
+                    members={workers}
+                />
+            </Card>
         </div>
     );
 }

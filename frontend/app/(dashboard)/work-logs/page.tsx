@@ -2,16 +2,18 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, Search } from 'lucide-react';
 import { useWorkers, Worker } from '@/hooks/useWorkers';
 import { WorkerTable } from './_components/worker-table';
 import { CreateWorkerDialog } from './_components/create-worker-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 
 export default function WorkLogsPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
     const { workers, isLoading, refreshWorkers } = useWorkers();
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleAdd = () => {
         setEditingWorker(null);
@@ -22,6 +24,11 @@ export default function WorkLogsPage() {
         setEditingWorker(worker);
         setIsDialogOpen(true);
     };
+
+    const filteredWorkers = workers.filter(worker =>
+        worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (worker.role && worker.role.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
 
     return (
         <div className="space-y-6">
@@ -35,12 +42,23 @@ export default function WorkLogsPage() {
                         <p className="text-sm text-gray-500">Manage your workforce repository for project and task assignments.</p>
                     </div>
                 </div>
-                <Button
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 shadow-sm"
-                    onClick={handleAdd}
-                >
-                    <Plus className="mr-2 h-4 w-4" /> Add Member
-                </Button>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                            placeholder="Search by name or role..."
+                            className="pl-10 h-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <Button
+                        className="bg-blue-600 hover:bg-blue-700 shadow-sm whitespace-nowrap"
+                        onClick={handleAdd}
+                    >
+                        <Plus className="mr-2 h-4 w-4" /> Add Member
+                    </Button>
+                </div>
             </div>
 
             <CreateWorkerDialog
@@ -55,11 +73,18 @@ export default function WorkLogsPage() {
                     <Skeleton className="h-[400px] w-full rounded-lg" />
                 </div>
             ) : (
-                <WorkerTable
-                    workers={workers}
-                    onUpdate={refreshWorkers}
-                    onEdit={handleEdit}
-                />
+                <>
+                    <WorkerTable
+                        workers={filteredWorkers}
+                        onUpdate={refreshWorkers}
+                        onEdit={handleEdit}
+                    />
+                    {filteredWorkers.length === 0 && searchQuery && (
+                        <div className="text-center py-10 text-gray-500">
+                            No team members found matching &quot;{searchQuery}&quot;
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

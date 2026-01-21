@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Paperclip, X, Download, Loader2, Plus } from 'lucide-react';
 import { uploadApi, projectApi } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
@@ -30,9 +29,10 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
         if (!file) return;
 
         try {
+            setIsUploading(true);
             // 1. Upload to Cloudinary via backend
             const uploadRes = await uploadApi.uploadFile(file);
-            const { url, public_id, resource_type } = uploadRes.data;
+            const { url, resource_type } = uploadRes.data;
 
             // 2. Update project attachments
             const newAttachment = {
@@ -59,6 +59,34 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
             });
         } finally {
             setIsUploading(false);
+        }
+    };
+
+    const handleDownload = async (url: string, filename: string, idx: number) => {
+        try {
+            setDownloadingIdx(idx);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Download failed');
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error("Download failed:", error);
+            toast({
+                title: "Download failed",
+                description: "Could not download the file. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
+            setDownloadingIdx(null);
         }
     };
 
@@ -97,35 +125,39 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
             </div>
 
             <div className="grid grid-cols-1 gap-2">
-                {initialAttachments.map((file, idx) => (
-                    <div
-                        key={idx}
-                        className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm"
-                    >
-                        <div className="flex items-center gap-2 overflow-hidden">
-                            <Paperclip className="h-4 w-4 text-gray-400 shrink-0" />
-                            <span className="truncate" title={file.name}>{file.name}</span>
+                {initialAttachments.map((file, idx) => {
+                    const isDownloading = downloadingIdx === idx;
+
+                    return (
+                        <div
+                            key={idx}
+                            className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm"
+                        >
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <Paperclip className="h-4 w-4 text-gray-400 shrink-0" />
+                                <span className="truncate" title={file.name}>{file.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                                    onClick={() => handleDownload(file.url, file.name)}
+                                >
+                                    <Download className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    onClick={() => handleRemove(idx)}
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                            <a
-                                href={file.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 h-7 w-7"
-                            >
-                                <Download className="h-3.5 w-3.5" />
-                            </a>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => handleRemove(idx)}
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </Button>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
                 {initialAttachments.length === 0 && (
                     <p className="text-xs text-center py-4 text-gray-500 italic">No attachments yet.</p>
                 )}

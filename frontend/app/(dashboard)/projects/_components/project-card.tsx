@@ -116,12 +116,15 @@ export const ProjectCard = ({
             <CardFooter className="flex flex-col gap-4 pt-0 border-t dark:border-gray-800 mt-4">
                 <div className="flex w-full items-center justify-between py-4">
                     <div className="flex -space-x-2">
-                        {members.map((member) => (
-                            <Avatar key={member._id} className="h-8 w-8 border-2 border-white dark:border-gray-900">
-                                <AvatarImage src={member.avatar} />
-                                <AvatarFallback>{member.name[0]}</AvatarFallback>
-                            </Avatar>
-                        ))}
+                        {members.map((member) => {
+                            const isValidAvatar = member.avatar && (member.avatar.startsWith('http') || member.avatar.startsWith('/'));
+                            return (
+                                <Avatar key={member._id} className="h-8 w-8 border-2 border-white dark:border-gray-900">
+                                    {isValidAvatar ? <AvatarImage src={member.avatar} /> : null}
+                                    <AvatarFallback>{member.name[0]}</AvatarFallback>
+                                </Avatar>
+                            );
+                        })}
                     </div>
                     <div className="flex items-center gap-4 text-gray-400 text-sm font-medium">
                         <div className="flex items-center gap-1">

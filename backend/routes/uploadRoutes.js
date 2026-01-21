@@ -42,4 +42,39 @@ router.post('/', upload.single('file'), (req, res) => {
     }
 });
 
+import https from 'https';
+
+// @desc    Download a file (proxy)
+// @route   GET /api/upload/download
+// @access  Public
+router.get('/download', (req, res) => {
+    const { url, filename } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ message: 'URL is required' });
+    }
+
+    try {
+        const decodedUrl = decodeURIComponent(url);
+
+        https.get(decodedUrl, (cloudinaryRes) => {
+            if (cloudinaryRes.statusCode !== 200) {
+                return res.status(cloudinaryRes.statusCode).json({ message: 'Failed to fetch from source' });
+            }
+
+            // Set headers for download
+            res.setHeader('Content-Disposition', `attachment; filename="${filename || 'download'}"`);
+            res.setHeader('Content-Type', cloudinaryRes.headers['content-type'] || 'application/octet-stream');
+
+            // Pipe the response from Cloudinary to our response
+            cloudinaryRes.pipe(res);
+        }).on('error', (err) => {
+            console.error('Download proxy error:', err);
+            res.status(500).json({ message: 'Error streaming file' });
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default router;

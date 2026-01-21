@@ -85,23 +85,25 @@ export function IssueManager({ projectId, initialIssues, onUpdate }: IssueManage
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {issues.sort((a, b) => new Date(b.reportedAt || 0).getTime() - new Date(a.reportedAt || 0).getTime()).map((issue, index) => (
-                            <div key={issue._id || index} className="flex flex-col gap-1 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                                <div className="flex items-center justify-between">
-                                    <Badge variant={issue.status === 'Resolved' ? 'outline' : 'secondary'} className="text-[10px] px-1.5 py-0">
-                                        {issue.status}
-                                    </Badge>
-                                    <span className="text-[10px] text-gray-400">
-                                        {issue.reportedAt ? new Date(issue.reportedAt).toLocaleDateString() : 'Just now'}
-                                    </span>
+                        {[...issues]
+                            .sort((a, b) => new Date(b.reportedAt || 0).getTime() - new Date(a.reportedAt || 0).getTime())
+                            .map((issue, index) => (
+                                <div key={issue._id || index} className="flex flex-col gap-1 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                                    <div className="flex items-center justify-between">
+                                        <Badge variant={issue.status === 'Resolved' ? 'outline' : 'secondary'} className="text-[10px] px-1.5 py-0">
+                                            {issue.status}
+                                        </Badge>
+                                        <span className="text-[10px] text-gray-400">
+                                            {issue.reportedAt ? new Date(issue.reportedAt).toLocaleString() : 'Just now'}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm font-medium">{issue.title}</p>
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                                        <AlertCircle className="h-3 w-3" />
+                                        <span>{issue.severity} Severity</span>
+                                    </div>
                                 </div>
-                                <p className="text-sm font-medium">{issue.title}</p>
-                                <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                                    <AlertCircle className="h-3 w-3" />
-                                    <span>{issue.severity} Severity</span>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
                     </div>
                 )}
             </div>

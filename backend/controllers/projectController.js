@@ -65,14 +65,17 @@ export const updateProject = async (req, res) => {
 
             if (req.body.members) {
                 project.members = req.body.members;
+                project.markModified('members');
             }
 
             if (req.body.attachments) {
                 project.attachments = req.body.attachments;
+                project.markModified('attachments');
             }
 
             if (req.body.issues) {
                 project.issues = req.body.issues;
+                project.markModified('issues');
             }
 
             const updatedProject = await project.save();
