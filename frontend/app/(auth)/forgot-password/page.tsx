@@ -45,11 +45,11 @@ export default function ForgotPasswordPage() {
         return (
             <div className="flex min-h-screen bg-white dark:bg-gray-950">
                 {/* Image Section */}
-                <div className="hidden lg:block w-1/2 relative overflow-hidden">
+                <div className="hidden lg:flex w-1/2 items-center justify-center p-12 dark:bg-gray-900">
                     <img
                         src="/Forget.jpeg"
                         alt="Forgot Password Visual"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="w-full max-w-md object-contain"
                     />
                 </div>
 

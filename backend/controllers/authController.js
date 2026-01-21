@@ -173,6 +173,36 @@ export const forgotPassword = async (req, res) => {
     }
 };
 
+// @desc    Validate OTP without clearing it (for reset flow)
+// @route   POST /api/auth/validate-otp
+// @access  Public
+export const validateOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return sendError(res, 404, 'The requested user account was not found.');
+        }
+
+        if (user.otp !== otp) {
+            return sendError(res, 400, 'The verification code provided is invalid. Please try again.');
+        }
+
+        if (user.otpExpires < Date.now()) {
+            return sendError(res, 400, 'The verification code has expired. Please request a new one.');
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Code verified successfully.'
+        });
+
+    } catch (error) {
+        sendError(res, 500, null, error);
+    }
+};
+
 // @desc    Reset Password
 // @route   POST /api/auth/reset-password
 // @access  Public
@@ -196,6 +226,7 @@ export const resetPassword = async (req, res) => {
         user.password = password; // Will be hashed by pre-save hook
         user.otp = undefined;
         user.otpExpires = undefined;
+        user.isVerified = true; // Proof of email ownership
         await user.save();
 
         res.status(200).json({
