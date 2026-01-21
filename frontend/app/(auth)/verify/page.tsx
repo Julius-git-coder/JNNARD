@@ -22,7 +22,8 @@ function VerifyContent() {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+            const endpoint = mode === 'reset' ? '/auth/validate-otp' : '/auth/verify-email';
+            const response = await fetch(`http://localhost:5000/api${endpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

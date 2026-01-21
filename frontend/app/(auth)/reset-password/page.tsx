@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { authApi } from '@/lib/api';
 import { handleError, handleSuccess } from '@/lib/error-handler';
 import { toast } from 'sonner';
 
@@ -43,21 +44,11 @@ function ResetPasswordContent() {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email,
-                    otp,
-                    password: passwords.new
-                }),
+            await authApi.resetPassword({
+                email,
+                otp,
+                password: passwords.new
             });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Reset failed');
-            }
 
             setIsSuccess(true);
             handleSuccess("Password reset successfully!");
