@@ -10,16 +10,19 @@ import { performanceApi } from '@/lib/api';
 import { useWorkers } from '@/hooks/useWorkers';
 import { useProjects } from '@/app/(dashboard)/projects/useProjects';
 import { useTasks } from '@/hooks/useTasks';
+import { PerformanceRecord } from '@/hooks/usePerformance';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface UpdatePerformanceDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess: () => void;
+    recordToEdit?: PerformanceRecord | null;
 }
 
-export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess }: UpdatePerformanceDialogProps) {
+export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess, recordToEdit }: UpdatePerformanceDialogProps) {
     const [workerId, setWorkerId] = useState('');
     const [projectId, setProjectId] = useState('');
     const [taskId, setTaskId] = useState('');
@@ -30,6 +33,30 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess }: Updat
     const [notes, setNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    React.useEffect(() => {
+        if (open) {
+            if (recordToEdit) {
+                setWorkerId(recordToEdit.worker?._id || '');
+                setProjectId(recordToEdit.project?._id || '');
+                setTaskId(recordToEdit.task?._id || '');
+                setMetric(recordToEdit.metric);
+                setTarget(recordToEdit.target);
+                setActual(recordToEdit.actual);
+                setStatus(recordToEdit.status);
+                setNotes(recordToEdit.notes || '');
+            } else {
+                setWorkerId('');
+                setProjectId('');
+                setTaskId('');
+                setMetric('Completion');
+                setTarget(100);
+                setActual(0);
+                setStatus('On Track');
+                setNotes('');
+            }
+        }
+    }, [open, recordToEdit]);
+
     const { workers } = useWorkers();
     const { projects } = useProjects();
     const { tasks } = useTasks(projectId); // Fetch tasks for selected project
@@ -38,7 +65,7 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess }: Updat
         e.preventDefault();
         try {
             setIsSubmitting(true);
-            await performanceApi.create({
+            const payload = {
                 worker: workerId,
                 project: projectId,
                 task: taskId || undefined,
@@ -47,17 +74,19 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess }: Updat
                 actual,
                 status,
                 notes,
-            });
+            };
+
+            if (recordToEdit) {
+                await performanceApi.update(recordToEdit._id, payload);
+                handleSuccess("Performance record has been updated successfully.");
+            } else {
+                await performanceApi.create(payload);
+                handleSuccess("Performance record has been saved successfully.");
+            }
             onSuccess();
             onOpenChange(false);
-            // Reset
-            setWorkerId('');
-            setProjectId('');
-            setTaskId('');
-            setActual(0);
-            setNotes('');
         } catch (error) {
-            console.error("Failed to update performance:", error);
+            handleError(error, "We couldn't save the performance record. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -67,7 +96,7 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess }: Updat
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Update Performance Record</DialogTitle>
+                    <DialogTitle>{recordToEdit ? 'Edit Performance Record' : 'Update Performance Record'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -169,7 +198,7 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess }: Updat
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                         <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
-                            {isSubmitting ? 'Saving...' : 'Record Performance'}
+                            {isSubmitting ? 'Saving...' : recordToEdit ? 'Save Changes' : 'Record Performance'}
                         </Button>
                     </DialogFooter>
                 </form>

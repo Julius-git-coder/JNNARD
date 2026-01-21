@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { workerApi } from '@/lib/api';
+import { handleError } from '@/lib/error-handler';
 
 export interface Worker {
     _id: string;
@@ -25,7 +26,7 @@ export function useWorkers() {
             const response = await workerApi.getAll();
             setWorkers(response.data);
         } catch (error) {
-            console.error("Failed to fetch workers:", error);
+            handleError(error, "Failed to load team members.");
         } finally {
             setIsLoading(false);
         }

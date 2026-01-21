@@ -3,16 +3,40 @@
 import React, { useState } from 'react';
 import { PerformanceChart } from '../_components/performance-chart';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { usePerformance } from '@/hooks/usePerformance';
+import { Plus, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { usePerformance, PerformanceRecord } from '@/hooks/usePerformance';
 import { UpdatePerformanceDialog } from './_components/update-performance-dialog';
+import { performanceApi } from '@/lib/api';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function PerformancePage() {
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+    const [recordToEdit, setRecordToEdit] = useState<PerformanceRecord | null>(null);
     const { records, isLoading, refreshRecords } = usePerformance();
+
+    const handleEdit = (record: PerformanceRecord) => {
+        setRecordToEdit(record);
+        setIsUpdateDialogOpen(true);
+    };
+
+    const handleAdd = () => {
+        setRecordToEdit(null);
+        setIsUpdateDialogOpen(true);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this performance record?')) return;
+        try {
+            await performanceApi.delete(id);
+            handleSuccess('Performance record deleted successfully.');
+            refreshRecords();
+        } catch (error) {
+            handleError(error, 'Failed to delete performance record.');
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -20,7 +44,7 @@ export default function PerformancePage() {
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Performance Overview</h1>
                 <Button
                     className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-                    onClick={() => setIsUpdateDialogOpen(true)}
+                    onClick={handleAdd}
                 >
                     <Plus className="mr-2 h-4 w-4" /> Record Performance
                 </Button>
@@ -30,6 +54,7 @@ export default function PerformancePage() {
                 open={isUpdateDialogOpen}
                 onOpenChange={setIsUpdateDialogOpen}
                 onSuccess={refreshRecords}
+                recordToEdit={recordToEdit}
             />
 
             <div className="grid grid-cols-1 gap-6">
@@ -37,17 +62,18 @@ export default function PerformancePage() {
                     <PerformanceChart isLoading={isLoading} />
                 </div>
 
-                <div className="border rounded-lg bg-white dark:bg-gray-950">
-                    <div className="overflow-auto max-h-[calc(100vh-450px)] min-h-[400px]">
+                <div className="border rounded-lg bg-white dark:bg-gray-950 shadow-sm overflow-hidden">
+                    <div className="overflow-auto max-h-[320px]">
                         <Table className="min-w-[700px] md:min-w-full relative">
-                            <TableHeader>
+                            <TableHeader className="sticky top-0 bg-white dark:bg-gray-950 z-10 shadow-sm">
                                 <TableRow>
-                                    <TableHead>Worker</TableHead>
-                                    <TableHead>Project</TableHead>
-                                    <TableHead>Target</TableHead>
-                                    <TableHead>Actual</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Last Updated</TableHead>
+                                    <TableHead className="bg-inherit">Worker</TableHead>
+                                    <TableHead className="bg-inherit">Project</TableHead>
+                                    <TableHead className="bg-inherit">Target</TableHead>
+                                    <TableHead className="bg-inherit">Actual</TableHead>
+                                    <TableHead className="bg-inherit">Status</TableHead>
+                                    <TableHead className="bg-inherit">Last Updated</TableHead>
+                                    <TableHead className="bg-inherit text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -75,6 +101,28 @@ export default function PerformancePage() {
                                         </TableCell>
                                         <TableCell className="text-sm text-gray-500">
                                             {new Date(record.evaluationDate).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    onClick={() => handleEdit(record)}
+                                                    title="Edit Record"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => handleDelete(record._id)}
+                                                    title="Delete Record"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

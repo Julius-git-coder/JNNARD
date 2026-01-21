@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -40,11 +41,11 @@ export default function LoginPage() {
                 avatar: result.avatar
             }));
 
-            toast.success("Login successful");
+            handleSuccess("Login successful");
             window.location.href = '/dashboard';
 
         } catch (err: any) {
-            toast.error(err.message);
+            handleError(err, 'Login failed. Please check your credentials and try again.');
         } finally {
             setIsLoading(false);
         }

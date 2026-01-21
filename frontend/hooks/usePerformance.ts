@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { performanceApi } from '@/lib/api';
+import { handleError } from '@/lib/error-handler';
 
 export interface PerformanceRecord {
     _id: string;
@@ -30,7 +31,7 @@ export function usePerformance() {
             const response = await performanceApi.getAll();
             setRecords(response.data);
         } catch (error) {
-            console.error("Failed to fetch performance records:", error);
+            handleError(error, "Failed to load performance records.");
         } finally {
             setIsLoading(false);
         }

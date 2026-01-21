@@ -27,15 +27,15 @@ export function WorkerTable({ workers, onUpdate, onEdit }: WorkerTableProps) {
     };
 
     return (
-        <div className="border rounded-lg overflow-hidden bg-white dark:bg-gray-950 shadow-sm">
-            <div className="overflow-x-auto">
+        <div className="border rounded-lg bg-white dark:bg-gray-950 shadow-sm overflow-hidden">
+            <div className="overflow-auto max-h-[320px]">
                 <Table className="min-w-[600px] md:min-w-full">
-                    <TableHeader>
+                    <TableHeader className="sticky top-0 bg-white dark:bg-gray-950 z-10 shadow-sm">
                         <TableRow>
-                            <TableHead>Member</TableHead>
-                            <TableHead>Position / Role</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead className="bg-inherit">Member</TableHead>
+                            <TableHead className="bg-inherit">Position / Role</TableHead>
+                            <TableHead className="bg-inherit">Status</TableHead>
+                            <TableHead className="bg-inherit text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

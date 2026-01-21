@@ -7,6 +7,7 @@ import { OTPInput } from '../_components/otp-input';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 function VerifyContent() {
     const searchParams = useSearchParams();
@@ -51,6 +52,7 @@ function VerifyContent() {
             }
 
         } catch (err: any) {
+            handleError(err, 'Verification failed. Please try again.');
             setError(err.message);
         } finally {
             setIsLoading(false);

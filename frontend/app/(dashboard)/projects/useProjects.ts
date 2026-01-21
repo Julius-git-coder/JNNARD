@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { projectApi } from '@/lib/api';
+import { handleError } from '@/lib/error-handler';
 
 export interface Project {
     _id: string; // MongoDB ID
@@ -32,7 +33,7 @@ export function useProjects() {
             const response = await projectApi.getAll();
             setProjects(response.data);
         } catch (error) {
-            console.error("Failed to fetch projects:", error);
+            handleError(error, "Failed to load projects.");
         } finally {
             setIsLoading(false);
         }

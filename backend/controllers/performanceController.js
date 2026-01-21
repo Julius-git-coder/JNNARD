@@ -7,7 +7,7 @@ import sendError from '../utils/errorResponse.js';
 export const getPerformanceRecords = async (req, res) => {
     try {
         const records = await Performance.find({})
-            .populate('worker', 'name role')
+            .populate('worker', 'name role avatar')
             .populate('project', 'title')
             .populate('task', 'title');
         res.json(records);
@@ -22,6 +22,7 @@ export const getPerformanceRecords = async (req, res) => {
 export const getPerformanceByWorker = async (req, res) => {
     try {
         const records = await Performance.find({ worker: req.params.workerId })
+            .populate('worker', 'name role avatar')
             .populate('project', 'title')
             .populate('task', 'title');
         res.json(records);

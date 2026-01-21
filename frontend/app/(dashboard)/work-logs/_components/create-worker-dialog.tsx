@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { workerApi } from '@/lib/api';
 import { Worker } from '@/hooks/useWorkers';
-import { useToast } from '@/components/ui/use-toast';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface CreateWorkerDialogProps {
     open: boolean;
@@ -23,7 +23,6 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
     const [status, setStatus] = useState('Active');
     const [avatar, setAvatar] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { toast } = useToast();
 
     useEffect(() => {
         if (open) {
@@ -49,17 +48,16 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
 
             if (workerToEdit) {
                 await workerApi.update(workerToEdit._id, data);
-                toast({ title: "Worker Updated", description: `${name} has been updated successfully.` });
+                handleSuccess(`${name}'s profile has been updated successfully.`);
             } else {
                 await workerApi.create(data);
-                toast({ title: "Worker Added", description: `${name} has been added to the team.` });
+                handleSuccess(`${name} has been added to the team.`);
             }
 
             onSuccess();
             onOpenChange(false);
         } catch (error) {
-            console.error("Failed to save worker:", error);
-            toast({ title: "Error", description: "Failed to save worker details.", variant: "destructive" });
+            handleError(error, "We couldn't save the team member's details. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

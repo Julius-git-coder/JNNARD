@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { taskApi } from '@/lib/api';
+import { handleError } from '@/lib/error-handler';
 
 export interface Task {
     _id: string;
@@ -30,7 +31,7 @@ export function useTasks(projectId?: string) {
                 : await taskApi.getAll();
             setTasks(response.data);
         } catch (error) {
-            console.error("Failed to fetch tasks:", error);
+            handleError(error, "Failed to load tasks.");
         } finally {
             setIsLoading(false);
         }

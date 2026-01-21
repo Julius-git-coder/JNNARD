@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 import { toast } from 'sonner';
 
 function ResetPasswordContent() {
@@ -59,10 +60,10 @@ function ResetPasswordContent() {
             }
 
             setIsSuccess(true);
-            toast.success("Password reset successfully!");
+            handleSuccess("Password reset successfully!");
 
         } catch (err: any) {
-            toast.error(err.message);
+            handleError(err, 'Reset failed. Please try again.');
         } finally {
             setIsLoading(false);
         }

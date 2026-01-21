@@ -25,8 +25,8 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
     };
 
     return (
-        <div className="border rounded-lg bg-white dark:bg-gray-950 overflow-hidden">
-            <div className="overflow-x-auto">
+        <div className="border rounded-lg bg-white dark:bg-gray-950 shadow-sm">
+            <div className="">
                 <Table className="min-w-[800px] md:min-w-full">
                     <TableHeader>
                         <TableRow>

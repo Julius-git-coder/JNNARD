@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 export default function ForgotPasswordPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -31,10 +32,10 @@ export default function ForgotPasswordPage() {
             }
 
             setIsSubmitted(true);
-            toast.success("Reset code sent! Check your email.");
+            handleSuccess("Reset code sent! Check your email.");
 
         } catch (err: any) {
-            toast.error(err.message);
+            handleError(err, 'Failed to send reset code. Please try again.');
         } finally {
             setIsLoading(false);
         }

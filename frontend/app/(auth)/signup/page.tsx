@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 export default function SignupPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -52,12 +53,12 @@ export default function SignupPage() {
                 throw new Error(result.message || 'Signup failed');
             }
 
-            toast.success("Signup successful! Please verify your email.");
+            handleSuccess("Signup successful! Please verify your email.");
             // Redirect to verify with email param
             window.location.href = '/verify?email=' + encodeURIComponent(formData.email);
 
         } catch (err: any) {
-            toast.error(err.message);
+            handleError(err, 'Signup failed. Please try again.');
         } finally {
             setIsLoading(false);
         }
