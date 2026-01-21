@@ -7,12 +7,14 @@ import {
     FileText,
     BarChart2,
     Settings,
-    Folder
+    Folder,
+    LayoutDashboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-    { name: 'Project', href: '/dashboard', icon: Folder }, // Using dashboard as projects home for now
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Project', href: '/projects', icon: Folder },
     { name: 'Tasks', href: '/tasks', icon: CheckSquare },
     { name: 'Work Logs', href: '/work-logs', icon: FileText },
     { name: 'Performance', href: '/performance', icon: BarChart2 },

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ProjectStatsChart } from '../_components/project-stats-chart';
+import { TasksChart } from '../_components/tasks-chart';
+import { WorkLogChart } from '../_components/work-log-chart';
+import { ProjectsCard } from '../_components/projects-card';
 import { PerformanceChart } from '../_components/performance-chart';
-import { TeamSection } from '../_components/team-section';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 
@@ -36,46 +37,24 @@ export default function DashboardPage() {
     }, []);
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Projects</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Dashboard</h1>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-8 space-y-6">
-                    <div className="flex flex-col md:flex-row gap-6">
-                        <div className="w-full md:w-1/3 min-h-[350px]">
-                            <ProjectStatsChart isLoading={isLoading} />
-                        </div>
-                        <div className="w-full md:w-2/3 min-h-[350px]">
-                            <PerformanceChart isLoading={isLoading} />
-                        </div>
-                    </div>
-
-                    <div className="pt-4">
-                        <TeamSection isLoading={isLoading} members={MOCK_TEAM} />
-                    </div>
+            {/* 2x2 Grid for Main Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="h-[400px]">
+                    <ProjectsCard isLoading={isLoading} />
                 </div>
-
-                <div className="lg:col-span-4">
-                    <Card className="h-full border-none shadow-none bg-transparent">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="font-bold text-lg text-gray-800">Projects</h3>
-                            <Link href="/projects" className="text-sm font-medium text-blue-600 hover:text-blue-700">View all</Link>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                            {MOCK_PROJECTS_PREVIEW.map((project) => (
-                                <div key={project.id} className="flex flex-col items-center gap-2">
-                                    <div className="aspect-square w-full rounded-xl overflow-hidden bg-gray-100 relative group cursor-pointer">
-                                        <img src={project.image} alt={project.name} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                                    </div>
-                                    <span className="text-xs font-medium text-gray-600">{project.name}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </Card>
+                <div className="h-[400px]">
+                    <TasksChart isLoading={isLoading} />
+                </div>
+                <div className="h-[400px]">
+                    <WorkLogChart isLoading={isLoading} />
+                </div>
+                <div className="h-[400px]">
+                    <PerformanceChart isLoading={isLoading} />
                 </div>
             </div>
         </div>
