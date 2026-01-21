@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Paperclip, X, Download, Loader2, Plus } from 'lucide-react';
 import { uploadApi, projectApi } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface Attachment {
     name: string;
@@ -23,7 +23,6 @@ interface AttachmentManagerProps {
 
 export function AttachmentManager({ projectId, initialAttachments, onUpdate }: AttachmentManagerProps) {
     const [isUploading, setIsUploading] = useState(false);
-    const { toast } = useToast();
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -45,18 +44,10 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
                 attachments: [...initialAttachments, newAttachment]
             });
 
-            toast({
-                title: "File uploaded",
-                description: `${file.name} has been attached to the project.`,
-            });
+            handleSuccess(`${file.name} has been attached to the project.`);
             onUpdate();
         } catch (error) {
-            console.error("Upload failed:", error);
-            toast({
-                title: "Upload failed",
-                description: "There was an error uploading your file.",
-                variant: "destructive"
-            });
+            handleError(error, "There was an error uploading your file.");
         } finally {
             setIsUploading(false);
         }
@@ -73,7 +64,7 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
 
             onUpdate();
         } catch (error) {
-            console.error("Failed to remove attachment:", error);
+            handleError(error, "Failed to remove attachment.");
         }
     };
 
