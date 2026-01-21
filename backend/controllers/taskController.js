@@ -1,4 +1,5 @@
 import Task from '../models/Task.js';
+import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all tasks
 // @route   GET /api/tasks
@@ -10,7 +11,7 @@ export const getTasks = async (req, res) => {
             .populate('assignedTo', 'name avatar role');
         res.json(tasks);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'Unable to retrieve tasks at this time.', error);
     }
 };
 
@@ -23,7 +24,7 @@ export const getTasksByProject = async (req, res) => {
             .populate('assignedTo', 'name avatar role');
         res.json(tasks);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'Unable to retrieve tasks for this project.', error);
     }
 };
 
@@ -38,10 +39,10 @@ export const getTaskById = async (req, res) => {
         if (task) {
             res.json(task);
         } else {
-            res.status(404).json({ message: 'Task not found' });
+            sendError(res, 404, 'The requested task could not be found.');
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, null, error);
     }
 };
 
@@ -64,7 +65,7 @@ export const createTask = async (req, res) => {
         });
         res.status(201).json(task);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to create task. Please ensure all required fields are correctly filled.', error);
     }
 };
 
@@ -88,10 +89,10 @@ export const updateTask = async (req, res) => {
             const updatedTask = await task.save();
             res.json(updatedTask);
         } else {
-            res.status(404).json({ message: 'Task not found' });
+            sendError(res, 404, 'The task you are attempting to update was not found.');
         }
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to update task details. Please check your input and try again.', error);
     }
 };
 
@@ -104,11 +105,11 @@ export const deleteTask = async (req, res) => {
 
         if (task) {
             await task.deleteOne();
-            res.json({ message: 'Task removed' });
+            res.json({ success: true, message: 'The task has been successfully removed.' });
         } else {
-            res.status(404).json({ message: 'Task not found' });
+            sendError(res, 404, 'The task you are trying to remove was not found.');
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'An issue occurred while trying to remove the task.', error);
     }
 };

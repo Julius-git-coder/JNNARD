@@ -1,4 +1,5 @@
 import Worker from '../models/Worker.js';
+import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all workers
 // @route   GET /api/workers
@@ -8,7 +9,7 @@ export const getWorkers = async (req, res) => {
         const workers = await Worker.find({});
         res.json(workers);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'Unable to retrieve workers at this time.', error);
     }
 };
 
@@ -21,10 +22,10 @@ export const getWorkerById = async (req, res) => {
         if (worker) {
             res.json(worker);
         } else {
-            res.status(404).json({ message: 'Worker not found' });
+            sendError(res, 404, 'The requested worker could not be found.');
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, null, error);
     }
 };
 
@@ -34,15 +35,15 @@ export const getWorkerById = async (req, res) => {
 export const createWorker = async (req, res) => {
     const { name, role, email, avatar } = req.body;
 
-    // Check if worker with email already exists (if email provided)
-    if (email) {
-        const workerExists = await Worker.findOne({ email });
-        if (workerExists) {
-            return res.status(400).json({ message: 'Worker with this email already exists' });
-        }
-    }
-
     try {
+        // Check if worker with email already exists (if email provided)
+        if (email) {
+            const workerExists = await Worker.findOne({ email });
+            if (workerExists) {
+                return sendError(res, 400, 'A worker with this email address already exists.');
+            }
+        }
+
         const worker = await Worker.create({
             name,
             role,
@@ -51,7 +52,7 @@ export const createWorker = async (req, res) => {
         });
         res.status(201).json(worker);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to create worker. Please ensure all required fields are provided correctly.', error);
     }
 };
 
@@ -72,10 +73,10 @@ export const updateWorker = async (req, res) => {
             const updatedWorker = await worker.save();
             res.json(updatedWorker);
         } else {
-            res.status(404).json({ message: 'Worker not found' });
+            sendError(res, 404, 'The worker profile you are trying to update was not found.');
         }
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to update worker details. Please check your input and try again.', error);
     }
 };
 
@@ -88,11 +89,11 @@ export const deleteWorker = async (req, res) => {
 
         if (worker) {
             await worker.deleteOne();
-            res.json({ message: 'Worker removed' });
+            res.json({ success: true, message: 'The worker has been successfully removed.' });
         } else {
-            res.status(404).json({ message: 'Worker not found' });
+            sendError(res, 404, 'The worker you are trying to remove was not found.');
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'An issue occurred while trying to remove the worker.', error);
     }
 };

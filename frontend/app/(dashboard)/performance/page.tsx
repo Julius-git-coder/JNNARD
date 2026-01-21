@@ -8,6 +8,7 @@ import { usePerformance } from '@/hooks/usePerformance';
 import { UpdatePerformanceDialog } from './_components/update-performance-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function PerformancePage() {
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
@@ -36,9 +37,9 @@ export default function PerformancePage() {
                     <PerformanceChart isLoading={isLoading} />
                 </div>
 
-                <div className="border rounded-lg overflow-hidden bg-white dark:bg-gray-950">
-                    <div className="overflow-x-auto">
-                        <Table className="min-w-[700px] md:min-w-full">
+                <div className="border rounded-lg bg-white dark:bg-gray-950">
+                    <div className="overflow-auto max-h-[calc(100vh-450px)] min-h-[400px]">
+                        <Table className="min-w-[700px] md:min-w-full relative">
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Worker</TableHead>
@@ -53,9 +54,15 @@ export default function PerformancePage() {
                                 {records.map((record) => (
                                     <TableRow key={record._id}>
                                         <TableCell>
-                                            <div>
-                                                <p className="font-medium">{record.worker?.name}</p>
-                                                <p className="text-xs text-gray-500">{record.worker?.role}</p>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarImage src={record.worker?.avatar} alt={record.worker?.name} />
+                                                    <AvatarFallback>{record.worker?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-medium">{record.worker?.name}</p>
+                                                    <p className="text-xs text-gray-500">{record.worker?.role}</p>
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>{record.project?.title}</TableCell>

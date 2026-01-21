@@ -1,4 +1,5 @@
 import Project from '../models/Project.js';
+import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all projects
 // @route   GET /api/projects
@@ -8,7 +9,7 @@ export const getProjects = async (req, res) => {
         const projects = await Project.find({}).populate('members', 'name role avatar');
         res.json(projects);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'Unable to retrieve projects at this time.', error);
     }
 };
 
@@ -21,10 +22,10 @@ export const getProjectById = async (req, res) => {
         if (project) {
             res.json(project);
         } else {
-            res.status(404).json({ message: 'Project not found' });
+            sendError(res, 404, 'The requested project could not be found.');
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, null, error);
     }
 };
 
@@ -45,7 +46,7 @@ export const createProject = async (req, res) => {
         });
         res.status(201).json(project);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to create project. Please verify that all required fields are correctly filled.', error);
     }
 };
 
@@ -82,10 +83,10 @@ export const updateProject = async (req, res) => {
             const populatedProject = await updatedProject.populate('members', 'name role avatar');
             res.json(populatedProject);
         } else {
-            res.status(404).json({ message: 'Project not found' });
+            sendError(res, 404, 'The project you are attempting to update was not found.');
         }
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to update project details. Please check your input and try again.', error);
     }
 };
 
@@ -98,11 +99,11 @@ export const deleteProject = async (req, res) => {
 
         if (project) {
             await project.deleteOne();
-            res.json({ message: 'Project removed' });
+            res.json({ success: true, message: 'The project has been successfully removed.' });
         } else {
-            res.status(404).json({ message: 'Project not found' });
+            sendError(res, 404, 'The project you are trying to remove was not found.');
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'An issue occurred while trying to remove the project.', error);
     }
 };

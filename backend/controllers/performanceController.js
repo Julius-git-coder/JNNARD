@@ -1,4 +1,5 @@
 import Performance from '../models/Performance.js';
+import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all performance records
 // @route   GET /api/performance
@@ -11,7 +12,7 @@ export const getPerformanceRecords = async (req, res) => {
             .populate('task', 'title');
         res.json(records);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'Unable to retrieve performance records at this time.', error);
     }
 };
 
@@ -25,7 +26,7 @@ export const getPerformanceByWorker = async (req, res) => {
             .populate('task', 'title');
         res.json(records);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'Unable to retrieve performance records for this worker.', error);
     }
 };
 
@@ -48,7 +49,7 @@ export const createPerformanceRecord = async (req, res) => {
         });
         res.status(201).json(record);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to create performance record. Please ensure all required fields are correctly filled.', error);
     }
 };
 
@@ -72,10 +73,10 @@ export const updatePerformanceRecord = async (req, res) => {
             const updatedRecord = await record.save();
             res.json(updatedRecord);
         } else {
-            res.status(404).json({ message: 'Performance record not found' });
+            sendError(res, 404, 'The performance record you are attempting to update was not found.');
         }
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        sendError(res, 400, 'Failed to update performance record details. Please check your input and try again.', error);
     }
 };
 
@@ -88,11 +89,11 @@ export const deletePerformanceRecord = async (req, res) => {
 
         if (record) {
             await record.deleteOne();
-            res.json({ message: 'Performance record removed' });
+            res.json({ success: true, message: 'The performance record has been successfully removed.' });
         } else {
-            res.status(404).json({ message: 'Performance record not found' });
+            sendError(res, 404, 'The performance record you are trying to remove was not found.');
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'An issue occurred while trying to remove the performance record.', error);
     }
 };

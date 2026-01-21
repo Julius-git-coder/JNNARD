@@ -5,7 +5,7 @@ import { performanceApi } from '@/lib/api';
 
 export interface PerformanceRecord {
     _id: string;
-    worker: { _id: string; name: string; role: string };
+    worker: { _id: string; name: string; role: string; avatar?: string };
     project: { _id: string; title: string };
     task?: { _id: string; title: string };
     metric: string;

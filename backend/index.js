@@ -8,6 +8,7 @@ import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import performanceRoutes from './routes/performanceRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import sendError from './utils/errorResponse.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,18 +37,12 @@ app.get('/', (req, res) => {
 
 // 404 Handler
 app.use((req, res, next) => {
-  console.log(`404 Hit: ${req.url}`);
-  res.status(404).json({
-    message: 'Route not found (Explicit 404)',
-    path: req.url,
-    method: req.method
-  });
+  sendError(res, 404, `The requested path (${req.url}) was not found.`);
 });
 
 // Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Server Error', error: err.message });
+  sendError(res, 500, null, err);
 });
 
 // Database Connection
