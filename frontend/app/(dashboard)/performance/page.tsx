@@ -36,52 +36,53 @@ export default function PerformancePage() {
                     <PerformanceChart isLoading={isLoading} />
                 </div>
 
-                <div className="border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Worker</TableHead>
-                                <TableHead>Project</TableHead>
-                                <TableHead>Target</TableHead>
-                                <TableHead>Actual</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Last Updated</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {records.map((record) => (
-                                <TableRow key={record._id}>
-                                    <TableCell>
-                                        <div>
-                                            <p className="font-medium">{record.worker?.name}</p>
-                                            <p className="text-xs text-gray-500">{record.worker?.role}</p>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{record.project?.title}</TableCell>
-                                    <TableCell>{record.target}%</TableCell>
-                                    <TableCell>{record.actual}%</TableCell>
-                                    <TableCell>
-                                        <Badge variant={record.status === 'Off Track' ? 'destructive' : 'secondary'}>
-                                            {record.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-sm text-gray-500">
-                                        {new Date(record.evaluationDate).toLocaleDateString()}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {records.length === 0 && !isLoading && (
+                <div className="border rounded-lg overflow-hidden bg-white dark:bg-gray-950">
+                    <div className="overflow-x-auto">
+                        <Table className="min-w-[700px] md:min-w-full">
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-10 text-gray-500">
-                                        No performance records found.
-                                    </TableCell>
+                                    <TableHead>Worker</TableHead>
+                                    <TableHead>Project</TableHead>
+                                    <TableHead>Target</TableHead>
+                                    <TableHead>Actual</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Last Updated</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {records.map((record) => (
+                                    <TableRow key={record._id}>
+                                        <TableCell>
+                                            <div>
+                                                <p className="font-medium">{record.worker?.name}</p>
+                                                <p className="text-xs text-gray-500">{record.worker?.role}</p>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{record.project?.title}</TableCell>
+                                        <TableCell>{record.target}%</TableCell>
+                                        <TableCell>{record.actual}%</TableCell>
+                                        <TableCell>
+                                            <Badge variant={record.status === 'Off Track' ? 'destructive' : 'secondary'}>
+                                                {record.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-sm text-gray-500">
+                                            {new Date(record.evaluationDate).toLocaleDateString()}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {records.length === 0 && !isLoading && (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                                            No performance records found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
-

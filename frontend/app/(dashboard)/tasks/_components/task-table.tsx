@@ -93,5 +93,6 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                     </TableBody>
                 </Table>
             </div>
-            );
+        </div>
+    );
 }
