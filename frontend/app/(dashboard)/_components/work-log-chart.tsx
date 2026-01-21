@@ -10,44 +10,52 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTasks } from '@/hooks/useTasks';
 
-const data = [
-    { name: 'Product 1', value: 35, color: '#ef4444' }, // Red
-    { name: 'Product 2', value: 25, color: '#3b82f6' }, // Blue
-    { name: 'Product 4', value: 20, color: '#fbbf24' }, // Yellow
-    { name: 'Product 5', value: 20, color: '#84cc16' }, // Green
-];
+const COLORS = ['#ef4444', '#3b82f6', '#fbbf24', '#84cc16', '#a855f7', '#06b6d4'];
 
-interface WorkLogChartProps {
-    isLoading?: boolean;
-}
+export function WorkLogChart({ isLoading: parentLoading }: { isLoading?: boolean }) {
+    const { tasks, isLoading: tasksLoading } = useTasks();
+    const isLoading = parentLoading || tasksLoading;
 
-export function WorkLogChart({ isLoading }: WorkLogChartProps) {
     if (isLoading) {
         return <Skeleton className="w-full h-[350px] rounded-xl" />;
     }
 
+    // Calculate task distribution per project
+    const projectDistribution = tasks.reduce((acc: any, task) => {
+        const projectName = task.project?.title || 'Unknown';
+        acc[projectName] = (acc[projectName] || 0) + 1;
+        return acc;
+    }, {});
+
+    const data = Object.keys(projectDistribution).map((name, index) => ({
+        name,
+        value: projectDistribution[name],
+        color: COLORS[index % COLORS.length]
+    }));
+
     return (
         <Card className="h-full border-none shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-bold">Work Log</CardTitle>
-                <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">This Week ▼</Badge>
+                <CardTitle className="text-lg font-bold">Work Distribution</CardTitle>
+                <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">By Project</Badge>
             </CardHeader>
             <CardContent className="flex items-center justify-between gap-4">
                 <div className="h-[250px] w-[250px] relative">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie
-                                data={data}
+                                data={data.length > 0 ? data : [{ name: 'No Tasks', value: 1, color: '#f3f4f6' }]}
                                 cx="50%"
                                 cy="50%"
                                 innerRadius={60}
-                                outerRadius={100}
-                                paddingAngle={0}
+                                outerRadius={85}
+                                paddingAngle={2}
                                 dataKey="value"
                                 stroke="none"
                             >
-                                {data.map((entry, index) => (
+                                {(data.length > 0 ? data : [{ color: '#f3f4f6' }]).map((entry: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Pie>
@@ -56,15 +64,18 @@ export function WorkLogChart({ isLoading }: WorkLogChartProps) {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[250px] overflow-y-auto">
                     {data.map((item) => (
                         <div key={item.name} className="flex items-center gap-3 text-sm">
-                            <span className="block w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
-                            <span className="text-gray-600 dark:text-gray-400 font-medium">{item.name}</span>
+                            <span className="block w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }}></span>
+                            <span className="text-gray-600 dark:text-gray-400 font-medium truncate w-24" title={item.name}>{item.name}</span>
+                            <span className="font-semibold">{item.value} tasks</span>
                         </div>
                     ))}
+                    {data.length === 0 && <p className="text-xs text-gray-500 italic">Assign tasks to see distribution</p>}
                 </div>
             </CardContent>
         </Card>
     );
 }
+

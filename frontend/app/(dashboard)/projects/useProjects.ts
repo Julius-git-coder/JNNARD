@@ -1,37 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { projectApi } from '@/lib/api';
 
-interface Project {
-    id: string;
+export interface Project {
+    _id: string; // MongoDB ID
     title: string;
     status: "Active" | "Pending" | "On Hold" | "Completed" | "Offtrack";
     description: string;
-    dueDate: string;
-    issueCount: number;
-    members: { id: string; name: string; avatar: string }[];
+    dueDate?: string; // Optional in DB schema, ensure mapped or handled
+    endDate?: string; // Using endDate as dueDate usually
+    issues?: any[]; // Adjust type as needed
+    members: { _id: string; name: string; avatar: string }[];
+    attachments?: { name: string; url: string; fileType: string }[];
 }
-
-// Move mock data here or keeping it simple
-const generateProjects = (count: number): Project[] => {
-    return Array.from({ length: count }).map((_, i) => ({
-        id: `proj-${i}`,
-        title: 'Adoddle',
-        status: (i % 3 === 0 ? 'Offtrack' : 'Active') as "Active" | "Pending" | "On Hold" | "Completed" | "Offtrack",
-        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-        dueDate: '05 APRIL 2023',
-        issueCount: 14,
-        members: [
-            { id: '1', name: 'User 1', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1' },
-            { id: '2', name: 'User 2', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2' },
-            { id: '3', name: 'User 3', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3' },
-            { id: '4', name: 'User 4', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4' },
-            { id: '5', name: 'User 5', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=5' },
-        ]
-    }));
-};
-
-const ALL_PROJECTS = generateProjects(12);
 
 export function useProjects() {
     const [isLoading, setIsLoading] = useState(true);
@@ -41,15 +23,25 @@ export function useProjects() {
     const itemsPerPage = 6;
 
     useEffect(() => {
-        // Simulate Fetch
-        const timer = setTimeout(() => {
-            setProjects(ALL_PROJECTS);
-            setIsLoading(false);
-        }, 1000);
-        return () => clearTimeout(timer);
+        fetchProjects();
     }, []);
 
-    const filteredProjects = projects.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    const fetchProjects = async () => {
+        try {
+            setIsLoading(true);
+            const response = await projectApi.getAll();
+            setProjects(response.data);
+        } catch (error) {
+            console.error("Failed to fetch projects:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const filteredProjects = projects.filter(p =>
+        p.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
     const displayedProjects = filteredProjects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -61,6 +53,7 @@ export function useProjects() {
         currentPage,
         setCurrentPage,
         totalPages,
-        hasProjects: projects.length > 0
+        hasProjects: projects.length > 0,
+        refreshProjects: fetchProjects
     };
 }

@@ -12,89 +12,92 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { usePerformance } from '@/hooks/usePerformance';
+import { format } from 'date-fns';
 
-const data = [
-    { name: 'Oct 2021', achieved: 4.8, target: 2.8 },
-    { name: 'Nov 2021', achieved: 6.2, target: 2.2 },
-    { name: 'Dec 2021', achieved: 6.0, target: 4.8 },
-    { name: 'Jan 2022', achieved: 4.2, target: 4.5 }, // Dip
-    { name: 'Jan 2022', achieved: 6.8, target: 4.6 }, // Peak
-    { name: 'Feb 2022', achieved: 5.0, target: 5.8 },
-    { name: 'Mar 2022', achieved: 6.2, target: 4.0 },
-    { name: 'Mar 2022', achieved: 5.2, target: 4.5 },
-];
+export function PerformanceChart({ isLoading: parentLoading }: { isLoading?: boolean }) {
+    const { records, isLoading: perfLoading } = usePerformance();
+    const isLoading = parentLoading || perfLoading;
 
-interface PerformanceChartProps {
-    isLoading?: boolean;
-}
-
-export function PerformanceChart({ isLoading }: PerformanceChartProps) {
     if (isLoading) {
         return <Skeleton className="w-full h-[350px] rounded-xl" />;
     }
 
+    // Group and average performance by date for the chart
+    const chartData = records.reduce((acc: any[], curr) => {
+        const date = format(new Date(curr.evaluationDate), 'MMM d');
+        const existing = acc.find(item => item.name === date);
+        if (existing) {
+            existing.achieved = (existing.achieved + curr.actual) / 2;
+            existing.target = (existing.target + curr.target) / 2;
+        } else {
+            acc.push({ name: date, achieved: curr.actual, target: curr.target });
+        }
+        return acc;
+    }, []).sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime()).slice(-7);
+
     return (
         <Card className="h-full border-none shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-8">
-                <CardTitle className="text-lg font-bold">Performance</CardTitle>
-                <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">This Week ▼</Badge>
+                <CardTitle className="text-lg font-bold">Performance Trends</CardTitle>
+                <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">Last 7 Records</Badge>
             </CardHeader>
             <CardContent className="h-[300px] w-full pl-0 relative">
-                {/* Legend */}
                 <div className="absolute right-0 top-[-60px] flex gap-4">
                     <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <span className="block w-2.5 h-2.5 rounded-full bg-orange-400"></span> Achieved
+                        <span className="block w-2.5 h-2.5 rounded-full bg-orange-400"></span> Actual %
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <span className="block w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Target
+                        <span className="block w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Target %
                     </div>
                 </div>
 
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                        data={data}
-                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                        <XAxis
-                            dataKey="name"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fontSize: 10, fill: '#9ca3af' }}
-                            dy={10}
-                            interval={1}
-                        />
-                        <YAxis
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fontSize: 10, fill: '#9ca3af' }}
-                            domain={[0, 12]}
-                            ticks={[0, 2, 4, 6, 8, 10, 12]}
-                            dx={-10}
-                        />
-                        <Tooltip
-                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="achieved"
-                            stroke="#fb923c"
-                            strokeWidth={3}
-                            dot={false}
-                            activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
-                            isAnimationActive={true}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="target"
-                            stroke="#6366f1"
-                            strokeWidth={3}
-                            dot={false}
-                            isAnimationActive={true}
-                        />
-                    </LineChart>
+                    {chartData.length > 0 ? (
+                        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                            <XAxis
+                                dataKey="name"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                                dy={10}
+                            />
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                                domain={[0, 100]}
+                                dx={-10}
+                            />
+                            <Tooltip
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            />
+                            <Line
+                                type="monotone"
+                                dataKey="achieved"
+                                stroke="#fb923c"
+                                strokeWidth={3}
+                                dot={{ r: 4, fill: '#fb923c', strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
+                            />
+                            <Line
+                                type="monotone"
+                                dataKey="target"
+                                stroke="#6366f1"
+                                strokeWidth={2}
+                                strokeDasharray="5 5"
+                                dot={false}
+                            />
+                        </LineChart>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-gray-400 italic">
+                            No performance data recorded yet.
+                        </div>
+                    )}
                 </ResponsiveContainer>
             </CardContent>
         </Card>
     );
 }
+

@@ -5,26 +5,40 @@ import { ProjectCard } from './_components/project-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import { useProjects } from './useProjects';
 
+import { CreateProjectDialog } from './_components/create-project-dialog';
+
 export default function ProjectsPage() {
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const {
         isLoading,
         projects,
         currentPage,
         setCurrentPage,
         totalPages,
-        hasProjects
+        hasProjects,
+        refreshProjects
     } = useProjects();
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50 self-start sm:self-center">Projects</h1>
-                <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+                <Button
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+                    onClick={() => setIsCreateDialogOpen(true)}
+                >
                     <Plus className="mr-2 h-4 w-4" /> Create
                 </Button>
             </div>
+
+            <CreateProjectDialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                onSuccess={refreshProjects}
+            />
 
             {/* LOADING STATE */}
             {isLoading && <ProjectsLoadingGrid />}
@@ -35,7 +49,7 @@ export default function ProjectsPage() {
                     title="No projects found"
                     description="Get started by creating your first project."
                     actionLabel="Create Project"
-                    onAction={() => { }}
+                    onAction={() => setIsCreateDialogOpen(true)}
                 />
             )}
 
@@ -44,7 +58,18 @@ export default function ProjectsPage() {
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {projects.map((project) => (
-                            <ProjectCard key={project.id} {...project} />
+                            <ProjectCard
+                                key={project._id}
+                                id={project._id}
+                                title={project.title}
+                                status={project.status}
+                                description={project.description}
+                                dueDate={project.dueDate}
+                                issueCount={project.issues ? project.issues.length : 0}
+                                members={project.members}
+                                attachments={project.attachments}
+                                onUpdate={refreshProjects}
+                            />
                         ))}
                     </div>
 
