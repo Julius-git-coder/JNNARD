@@ -7,6 +7,7 @@ import workerRoutes from './routes/workerRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import performanceRoutes from './routes/performanceRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
