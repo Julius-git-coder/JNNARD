@@ -1,6 +1,5 @@
-'use client';
-
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -22,14 +21,18 @@ interface SelectContextType {
     open: boolean;
     setOpen: (open: boolean) => void;
     disabled?: boolean;
+    triggerRect: DOMRect | null;
+    setTriggerRect: (rect: DOMRect | null) => void;
 }
 
 const SelectContext = React.createContext<SelectContextType | undefined>(undefined);
 
 export function Select({ value, onValueChange, children, disabled }: SelectProps) {
     const [open, setOpen] = React.useState(false);
+    const [triggerRect, setTriggerRect] = React.useState<DOMRect | null>(null);
+
     return (
-        <SelectContext.Provider value={{ value, onValueChange, open, setOpen, disabled }}>
+        <SelectContext.Provider value={{ value, onValueChange, open, setOpen, disabled, triggerRect, setTriggerRect }}>
             <div className="relative">{children}</div>
         </SelectContext.Provider>
     );
@@ -37,13 +40,23 @@ export function Select({ value, onValueChange, children, disabled }: SelectProps
 
 export function SelectTrigger({ className, children }: { className?: string; children: React.ReactNode }) {
     const context = React.useContext(SelectContext);
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
+
     if (!context) return null;
+
+    const handleToggle = () => {
+        if (triggerRef.current) {
+            context.setTriggerRect(triggerRef.current.getBoundingClientRect());
+        }
+        context.setOpen(!context.open);
+    };
 
     return (
         <button
+            ref={triggerRef}
             type="button"
             disabled={context.disabled}
-            onClick={() => context.setOpen(!context.open)}
+            onClick={handleToggle}
             className={cn(
                 "flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:ring-offset-gray-950 dark:placeholder:text-gray-400",
                 className
@@ -63,15 +76,34 @@ export function SelectValue({ placeholder }: { placeholder?: string }) {
 
 export function SelectContent({ children }: { children: React.ReactNode }) {
     const context = React.useContext(SelectContext);
-    if (!context || !context.open) return null;
+    const [mounted, setMounted] = React.useState(false);
 
-    return (
+    React.useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    if (!context || !context.open || !mounted) return null;
+
+    const style: React.CSSProperties = context.triggerRect ? {
+        position: 'fixed',
+        top: context.triggerRect.bottom + 4,
+        left: context.triggerRect.left,
+        width: context.triggerRect.width,
+        zIndex: 9999,
+    } : {};
+
+    return createPortal(
         <>
-            <div className="fixed inset-0 z-50" onClick={() => context.setOpen(false)} />
-            <div className="absolute top-full left-0 z-50 mt-1 w-full min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-950 shadow-md animate-in fade-in-0 zoom-in-95 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50">
+            <div className="fixed inset-0 z-[9998]" onClick={() => context.setOpen(false)} />
+            <div
+                style={style}
+                className="overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-950 shadow-md animate-in fade-in-0 zoom-in-95 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50"
+            >
                 {children}
             </div>
-        </>
+        </>,
+        document.body
     );
 }
 

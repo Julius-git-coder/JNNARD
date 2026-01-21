@@ -13,6 +13,7 @@ import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface CreateProjectDialogProps {
     open: boolean;
@@ -77,13 +78,15 @@ export function CreateProjectDialog({ open, onOpenChange, onSuccess, project }: 
 
             if (isEdit && project) {
                 await projectApi.update(project._id, projectData);
+                handleSuccess('Project updated successfully.');
             } else {
                 await projectApi.create(projectData);
+                handleSuccess('Project created successfully.');
             }
             onSuccess();
             onOpenChange(false);
         } catch (error) {
-            console.error(isEdit ? "Failed to update project:" : "Failed to create project:", error);
+            handleError(error, isEdit ? "Failed to update project." : "Failed to create project.");
         } finally {
             setIsSubmitting(false);
         }

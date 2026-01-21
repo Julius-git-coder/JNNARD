@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, Upload, User as UserIcon, Loader2, Save } from 'lucide-react';
-import { toast } from 'sonner';
+import { authApi } from '@/lib/api';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 export default function SettingsPage() {
     const [user, setUser] = useState<any>(null);
@@ -57,7 +58,6 @@ export default function SettingsPage() {
         setIsSaving(true);
 
         try {
-            const token = localStorage.getItem('accessToken');
             const data = new FormData();
             data.append('name', formData.name);
             data.append('email', formData.email);
@@ -67,20 +67,8 @@ export default function SettingsPage() {
                 data.append('avatar', avatarFile);
             }
 
-            const response = await fetch('http://localhost:5000/api/auth/profile', {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                    // Content-Type is auto-set by browser for FormData
-                },
-                body: data
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Update failed');
-            }
+            const response = await authApi.updateProfile(data);
+            const result = response.data;
 
             // Update local storage
             localStorage.setItem('user', JSON.stringify({
@@ -89,10 +77,13 @@ export default function SettingsPage() {
                 avatar: result.avatar
             }));
             setUser(result);
-            alert('Profile updated successfully!'); // Simple feedback for now
+            handleSuccess('Your profile has been updated successfully!');
+
+            // Dispatch event for header to update
+            window.dispatchEvent(new Event('user-updated'));
 
         } catch (error: any) {
-            alert(error.message);
+            handleError(error, "We couldn't update your profile settings. Please check your information and try again.");
         } finally {
             setIsSaving(false);
         }

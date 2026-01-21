@@ -9,8 +9,12 @@ export const handleError = (error: any, fallbackMessage: string = 'An unexpected
 
     if (error.response) {
         // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        message = error.response.data?.message || error.response.data?.error || fallbackMessage;
+        if (error.response.status === 401) {
+            message = error.response.data?.message || 'Your session has expired. Please sign in again.';
+            // Potential optimization: redirect to login if we have a router
+        } else {
+            message = error.response.data?.message || error.response.data?.error || fallbackMessage;
+        }
     } else if (error.request) {
         // The request was made but no response was received
         message = 'We are having trouble connecting to the server. Please check your internet connection.';

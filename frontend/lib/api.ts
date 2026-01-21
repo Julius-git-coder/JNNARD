@@ -2,10 +2,24 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api',
-    headers: {
-        'Content-Type': 'application/json',
-    },
 });
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export const authApi = {
+    updateProfile: (data: FormData) => api.put('/auth/profile', data, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    }),
+    resetPassword: (data: any) => api.post('/auth/reset-password', data),
+};
 
 export const projectApi = {
     getAll: () => api.get('/projects'),

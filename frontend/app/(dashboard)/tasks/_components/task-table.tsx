@@ -8,6 +8,7 @@ import { Task } from '@/hooks/useTasks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { taskApi } from '@/lib/api';
 import { format } from 'date-fns';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface TaskTableProps {
     tasks: Task[];
@@ -18,15 +19,16 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
     const handleStatusChange = async (taskId: string, newStatus: string) => {
         try {
             await taskApi.update(taskId, { status: newStatus });
+            handleSuccess(`Task status updated to ${newStatus}.`);
             onUpdate();
         } catch (error) {
-            console.error("Failed to update status:", error);
+            handleError(error, "Failed to update task status.");
         }
     };
 
     return (
-        <div className="border rounded-lg bg-white dark:bg-gray-950 shadow-sm">
-            <div className="">
+        <div className="border rounded-lg bg-white dark:bg-gray-950 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
                 <Table className="min-w-[800px] md:min-w-full">
                     <TableHeader>
                         <TableRow>

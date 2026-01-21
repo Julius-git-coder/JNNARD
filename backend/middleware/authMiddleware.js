@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import sendError from '../utils/errorResponse.js';
 
 export const protect = async (req, res, next) => {
     let token;
@@ -15,14 +16,15 @@ export const protect = async (req, res, next) => {
 
             req.user = await User.findById(decoded.id).select('-password');
 
+            if (!req.user) {
+                return sendError(res, 401, 'Your session is no longer valid. Please sign in again.');
+            }
+
             next();
         } catch (error) {
-            console.error(error);
-            res.status(401).json({ message: 'Not authorized, token failed' });
+            sendError(res, 401, 'Your session has expired or is invalid. Please sign in again.', error);
         }
-    }
-
-    if (!token) {
-        res.status(401).json({ message: 'Not authorized, no token' });
+    } else {
+        sendError(res, 401, 'Access denied. Please sign in to continue.');
     }
 };

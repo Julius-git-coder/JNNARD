@@ -11,6 +11,7 @@ import { taskApi } from '@/lib/api';
 import { useProjects } from '@/app/(dashboard)/projects/useProjects';
 import { useWorkers } from '@/hooks/useWorkers';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface CreateTaskDialogProps {
     open: boolean;
@@ -44,6 +45,7 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess }: CreateTaskDi
                 dueDate: dueDate || undefined,
                 deliverables,
             });
+            handleSuccess('Task has been assigned successfully.');
             onSuccess();
             onOpenChange(false);
             // Reset
@@ -55,7 +57,7 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess }: CreateTaskDi
             setDueDate('');
             setDeliverables('');
         } catch (error) {
-            console.error("Failed to create task:", error);
+            handleError(error, "Failed to create task.");
         } finally {
             setIsSubmitting(false);
         }
