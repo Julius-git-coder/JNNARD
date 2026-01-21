@@ -27,10 +27,12 @@ const upload = multer({ storage: storage });
 // @desc    Upload a file
 // @route   POST /api/upload
 // @access  Public (for now)
+import sendError from '../utils/errorResponse.js';
+
 router.post('/', upload.single('file'), (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json({ message: 'No file uploaded' });
+            return sendError(res, 400, 'Please select a file to upload.');
         }
         res.json({
             name: req.file.originalname,
@@ -38,7 +40,7 @@ router.post('/', upload.single('file'), (req, res) => {
             public_id: req.file.filename,
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        sendError(res, 500, 'We encountered an error while processing your file upload.', error);
     }
 });
 
