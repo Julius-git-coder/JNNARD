@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Paperclip, X, Download, Loader2, Plus } from 'lucide-react';
 import { uploadApi, projectApi } from '@/lib/api';
 import { handleError, handleSuccess } from '@/lib/error-handler';
+import { downloadFile } from '@/lib/utils';
 
 interface Attachment {
     name: string;
@@ -98,14 +99,21 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
                             <span className="truncate" title={file.name}>{file.name}</span>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
-                            <a
-                                href={file.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 h-7 w-7"
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                                onClick={async () => {
+                                    try {
+                                        await downloadFile(file.url, file.name);
+                                    } catch (error) {
+                                        handleError(error, "Failed to start download.");
+                                    }
+                                }}
+                                title="Download"
                             >
                                 <Download className="h-3.5 w-3.5" />
-                            </a>
+                            </Button>
                             <Button
                                 variant="ghost"
                                 size="icon"
