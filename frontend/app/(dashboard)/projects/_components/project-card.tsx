@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MoreVertical, Paperclip, MessageSquare, Edit2, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AttachmentManager } from './attachment-manager';
@@ -117,15 +118,44 @@ export const ProjectCard = ({
             <CardFooter className="flex flex-col gap-4 pt-0 border-t dark:border-gray-800 mt-4">
                 <div className="flex w-full items-center justify-between py-4">
                     <div className="flex -space-x-2">
-                        {members.map((member) => {
+                        {members.slice(0, 5).map((member) => {
                             const isValidAvatar = member.avatar && (member.avatar.startsWith('http') || member.avatar.startsWith('/'));
                             return (
-                                <Avatar key={member._id} className="h-8 w-8 border-2 border-white dark:border-gray-900">
-                                    {isValidAvatar ? <AvatarImage src={member.avatar} /> : null}
-                                    <AvatarFallback>{member.name[0]}</AvatarFallback>
-                                </Avatar>
+                                <Tooltip key={member._id}>
+                                    <TooltipTrigger asChild>
+                                        <div className="group cursor-pointer relative z-0 hover:z-50 transition-all duration-150">
+                                            <Avatar className="h-8 w-8 border-2 border-white dark:border-gray-900 group-hover:border-blue-500 group-hover:ring-1 group-hover:ring-blue-500 transition-all">
+                                                {isValidAvatar ? <AvatarImage src={member.avatar} /> : null}
+                                                <AvatarFallback>{member.name[0]}</AvatarFallback>
+                                            </Avatar>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <div className="text-center">
+                                            <p className="font-semibold text-xs">{member.name}</p>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
                             );
                         })}
+                        {members.length > 5 && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="h-8 w-8 rounded-full border-2 border-white dark:border-gray-900 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-400 z-10 cursor-help">
+                                        +{members.length - 5}
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <div className="text-left space-y-1">
+                                        <p className="font-semibold text-xs mb-1">More team members:</p>
+                                        {members.slice(5, 10).map(m => (
+                                            <p key={m._id} className="text-xs">• {m.name}</p>
+                                        ))}
+                                        {members.length > 10 && <p className="text-xs opacity-50 italic">and {members.length - 10} more...</p>}
+                                    </div>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
                     </div>
                     <div className="flex items-center gap-4 text-gray-400 text-sm font-medium">
                         <div className="flex items-center gap-1">

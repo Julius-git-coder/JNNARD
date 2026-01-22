@@ -38,9 +38,9 @@ export function TeamSection({ isLoading, members }: TeamSectionProps) {
         return (
             <div className="space-y-4">
                 <Skeleton className="h-8 w-48" />
-                <div className="flex flex-wrap gap-4">
+                <div className="flex -space-x-4">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <Skeleton key={i} className="h-14 w-14 rounded-full" />
+                        <Skeleton key={i} className="h-14 w-14 rounded-full border-4 border-white dark:border-gray-950" />
                     ))}
                 </div>
             </div>
@@ -80,18 +80,15 @@ export function TeamSection({ isLoading, members }: TeamSectionProps) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-6">
-                {filteredMembers.map((member) => (
+            <div className="flex flex-wrap -space-x-4">
+                {filteredMembers.slice(0, 5).map((member) => (
                     <Tooltip key={member._id}>
                         <TooltipTrigger asChild>
-                            <div className="flex flex-col items-center gap-2 group cursor-pointer">
-                                <Avatar className="h-14 w-14 ring-2 ring-transparent group-hover:ring-blue-500 transition-all shadow-sm">
+                            <div className="group cursor-pointer relative z-0 hover:z-50 transition-all duration-200">
+                                <Avatar className="h-14 w-14 border-4 border-white dark:border-gray-950 shadow-sm ring-2 ring-transparent group-hover:ring-blue-500">
                                     <AvatarImage src={member.avatar} alt={member.name} />
                                     <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
-                                <span className="text-[10px] font-medium text-gray-500 truncate w-full text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {member.name}
-                                </span>
                             </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -102,10 +99,30 @@ export function TeamSection({ isLoading, members }: TeamSectionProps) {
                         </TooltipContent>
                     </Tooltip>
                 ))}
-                <Link href="/work-logs">
+
+                {filteredMembers.length > 5 && (
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <button className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors group">
+                            <div className="h-14 w-14 rounded-full border-4 border-white dark:border-gray-950 bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm shadow-sm z-10 cursor-help">
+                                +{filteredMembers.length - 5}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <div className="text-left space-y-1">
+                                <p className="font-semibold mb-1">More team members:</p>
+                                {filteredMembers.slice(5, 12).map(m => (
+                                    <p key={m._id} className="text-xs">• {m.name}</p>
+                                ))}
+                                {filteredMembers.length > 12 && <p className="text-xs opacity-50 italic">and {filteredMembers.length - 12} more...</p>}
+                            </div>
+                        </TooltipContent>
+                    </Tooltip>
+                )}
+
+                <Link href="/work-logs" className="z-20 ml-6">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white dark:border-gray-950 bg-white border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors group">
                                 <Plus className="h-6 w-6 text-gray-400 group-hover:text-blue-500" />
                             </button>
                         </TooltipTrigger>
