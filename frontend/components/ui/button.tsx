@@ -1,16 +1,22 @@
 import * as React from "react"
 import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
     size?: "default" | "sm" | "lg" | "icon"
     isLoading?: boolean
+    tooltip?: string
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant = "default", size = "default", isLoading, children, disabled, ...props }, ref) => {
+    ({ className, variant = "default", size = "default", isLoading, children, disabled, tooltip, ...props }, ref) => {
 
         const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300"
 
@@ -30,7 +36,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             icon: "h-10 w-10",
         }
 
-        return (
+        const button = (
             <button
                 className={cn(baseStyles, variants[variant], sizes[size], className)}
                 ref={ref}
@@ -41,6 +47,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 {children}
             </button>
         )
+
+        if (tooltip) {
+            return (
+                <Tooltip>
+                    <TooltipTrigger asChild>{button}</TooltipTrigger>
+                    <TooltipContent>
+                        <p>{tooltip}</p>
+                    </TooltipContent>
+                </Tooltip>
+            )
+        }
+
+        return button
     }
 )
 Button.displayName = "Button"

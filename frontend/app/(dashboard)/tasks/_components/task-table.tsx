@@ -72,7 +72,7 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                                         value={task.status}
                                         onValueChange={(val) => handleStatusChange(task._id, val)}
                                     >
-                                        <SelectTrigger className="w-[130px] h-8 text-xs">
+                                        <SelectTrigger className="w-[130px] h-8 text-xs" tooltip="Change status">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>

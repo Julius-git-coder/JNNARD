@@ -8,6 +8,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface TeamMember {
     _id: string;
@@ -77,20 +82,37 @@ export function TeamSection({ isLoading, members }: TeamSectionProps) {
 
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-6">
                 {filteredMembers.map((member) => (
-                    <div key={member._id} className="flex flex-col items-center gap-2 group cursor-pointer">
-                        <Avatar className="h-14 w-14 ring-2 ring-transparent group-hover:ring-blue-500 transition-all shadow-sm">
-                            <AvatarImage src={member.avatar} alt={member.name} />
-                            <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-[10px] font-medium text-gray-500 truncate w-full text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            {member.name}
-                        </span>
-                    </div>
+                    <Tooltip key={member._id}>
+                        <TooltipTrigger asChild>
+                            <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                                <Avatar className="h-14 w-14 ring-2 ring-transparent group-hover:ring-blue-500 transition-all shadow-sm">
+                                    <AvatarImage src={member.avatar} alt={member.name} />
+                                    <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-[10px] font-medium text-gray-500 truncate w-full text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {member.name}
+                                </span>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <div className="text-center">
+                                <p className="font-semibold">{member.name}</p>
+                                {member.role && <p className="text-xs opacity-80">{member.role}</p>}
+                            </div>
+                        </TooltipContent>
+                    </Tooltip>
                 ))}
                 <Link href="/work-logs">
-                    <button className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors group">
-                        <Plus className="h-6 w-6 text-gray-400 group-hover:text-blue-500" />
-                    </button>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors group">
+                                <Plus className="h-6 w-6 text-gray-400 group-hover:text-blue-500" />
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Manage Team</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </Link>
             </div>
             {filteredMembers.length === 0 && searchQuery && (

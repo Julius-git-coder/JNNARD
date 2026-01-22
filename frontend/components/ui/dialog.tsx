@@ -5,6 +5,12 @@ import { X } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
@@ -60,12 +66,19 @@ export function DialogContent({ children, className }: { children: React.ReactNo
                 "relative bg-white dark:bg-gray-950 rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-in zoom-in-95 duration-200",
                 className
             )}>
-                <button
-                    onClick={() => onOpenChange(false)}
-                    className="absolute right-4 top-4 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                    <X className="h-4 w-4" />
-                </button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button
+                            onClick={() => onOpenChange(false)}
+                            className="absolute right-4 top-4 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Close</p>
+                    </TooltipContent>
+                </Tooltip>
                 {children}
             </div>
         </div>

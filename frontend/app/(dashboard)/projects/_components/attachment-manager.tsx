@@ -110,7 +110,7 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
                                         handleError(error, "Failed to start download.");
                                     }
                                 }}
-                                title="Download"
+                                tooltip="Download"
                             >
                                 <Download className="h-3.5 w-3.5" />
                             </Button>
@@ -119,6 +119,7 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
                                 size="icon"
                                 className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
                                 onClick={() => handleRemove(idx)}
+                                tooltip="Remove Attachment"
                             >
                                 <X className="h-3.5 w-3.5" />
                             </Button>

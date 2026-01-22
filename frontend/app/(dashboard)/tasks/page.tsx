@@ -20,6 +20,7 @@ export default function TasksPage() {
                 <Button
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={() => setIsCreateDialogOpen(true)}
+                    tooltip="Create new task"
                 >
                     <Plus className="mr-2 h-4 w-4" /> New Task
                 </Button>

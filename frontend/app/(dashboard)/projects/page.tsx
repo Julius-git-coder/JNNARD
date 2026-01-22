@@ -29,6 +29,7 @@ export default function ProjectsPage() {
                 <Button
                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
                     onClick={() => setIsCreateDialogOpen(true)}
+                    tooltip="Create new project"
                 >
                     <Plus className="mr-2 h-4 w-4" /> Create
                 </Button>
@@ -80,6 +81,7 @@ export default function ProjectsPage() {
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(c => c - 1)}
                             className="text-gray-500"
+                            tooltip="Go to previous page"
                         >
                             Previous
                         </Button>
@@ -90,6 +92,7 @@ export default function ProjectsPage() {
                                 size="icon"
                                 className={currentPage === i + 1 ? "bg-blue-900 text-white hover:bg-blue-800" : "bg-gray-200 text-gray-900 hover:bg-gray-300"}
                                 onClick={() => setCurrentPage(i + 1)}
+                                tooltip={`Go to page ${i + 1}`}
                             >
                                 {i + 1}
                             </Button>
@@ -99,6 +102,7 @@ export default function ProjectsPage() {
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(c => c + 1)}
                             className="text-gray-500"
+                            tooltip="Go to next page"
                         >
                             Next
                         </Button>

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: 'Project Management Dashboard',
 }
 
+import { TooltipProvider } from '@/components/ui/tooltip'
+
 export default function RootLayout({
   children,
 }: {
@@ -18,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
         <Toaster position="top-center" richColors />
       </body>
     </html>

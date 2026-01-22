@@ -4,6 +4,12 @@ import { ChevronDown, Check } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
@@ -38,7 +44,7 @@ export function Select({ value, onValueChange, children, disabled }: SelectProps
     );
 }
 
-export function SelectTrigger({ className, children }: { className?: string; children: React.ReactNode }) {
+export function SelectTrigger({ className, children, title, tooltip }: { className?: string; children: React.ReactNode; title?: string; tooltip?: string }) {
     const context = React.useContext(SelectContext);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
 
@@ -51,12 +57,13 @@ export function SelectTrigger({ className, children }: { className?: string; chi
         context.setOpen(!context.open);
     };
 
-    return (
+    const trigger = (
         <button
             ref={triggerRef}
             type="button"
             disabled={context.disabled}
             onClick={handleToggle}
+            title={title}
             className={cn(
                 "flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:ring-offset-gray-950 dark:placeholder:text-gray-400",
                 className
@@ -66,6 +73,19 @@ export function SelectTrigger({ className, children }: { className?: string; chi
             <ChevronDown className="h-4 w-4 opacity-50" />
         </button>
     );
+
+    if (tooltip) {
+        return (
+            <Tooltip>
+                <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+                <TooltipContent>
+                    <p>{tooltip}</p>
+                </TooltipContent>
+            </Tooltip>
+        );
+    }
+
+    return trigger;
 }
 
 export function SelectValue({ placeholder }: { placeholder?: string }) {

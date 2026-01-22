@@ -62,12 +62,13 @@ export const ProjectCard = ({
                         size="icon"
                         className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         onClick={() => setIsEditOpen(true)}
+                        tooltip="Edit Project"
                     >
                         <Edit2 className="h-4 w-4" />
                     </Button>
                     <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
                         <DialogTrigger>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" tooltip="Project Assets">
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
                         </DialogTrigger>
@@ -133,10 +134,14 @@ export const ProjectCard = ({
                         </div>
                         <Dialog open={isIssuesOpen} onOpenChange={setIsIssuesOpen}>
                             <DialogTrigger>
-                                <button type="button" className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors">
+                                <Button
+                                    variant="ghost"
+                                    className="flex items-center gap-1 h-auto p-0 hover:bg-transparent text-gray-400 hover:text-blue-500 transition-colors"
+                                    tooltip="View Messages & Issues"
+                                >
                                     <MessageSquare className="h-4 w-4" />
                                     <span>{issues.length}</span>
-                                </button>
+                                </Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>

@@ -55,6 +55,7 @@ export default function WorkLogsPage() {
                     <Button
                         className="bg-blue-600 hover:bg-blue-700 shadow-sm whitespace-nowrap"
                         onClick={handleAdd}
+                        tooltip="Add new team member"
                     >
                         <Plus className="mr-2 h-4 w-4" /> Add Member
                     </Button>
