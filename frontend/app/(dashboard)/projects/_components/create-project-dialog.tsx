@@ -140,6 +140,7 @@ export function CreateProjectDialog({ open, onOpenChange, onSuccess, project }: 
                                     <SelectItem value="Pending">Pending</SelectItem>
                                     <SelectItem value="On Hold">On Hold</SelectItem>
                                     <SelectItem value="Offtrack">Offtrack</SelectItem>
+                                    <SelectItem value="Completed">Completed</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

@@ -43,8 +43,8 @@ export const ProjectCard = ({
     const [isIssuesOpen, setIsIssuesOpen] = useState(false);
 
     const statusVariant =
-        status === 'Completed' ? 'default' :
-            status === 'On Hold' ? 'secondary' :
+        status === 'Completed' ? 'completed' :
+            status === 'On Hold' ? 'onhold' :
                 status === 'Offtrack' ? 'destructive' :
                     'secondary';
 

@@ -11,10 +11,18 @@ import { handleError, handleSuccess } from '@/lib/error-handler';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function PerformancePage() {
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
     const [recordToEdit, setRecordToEdit] = useState<PerformanceRecord | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const { records, isLoading, refreshRecords } = usePerformance();
 
     const handleEdit = (record: PerformanceRecord) => {
@@ -38,16 +46,41 @@ export default function PerformancePage() {
         }
     };
 
+    const filteredRecords = records.filter(record =>
+        record.worker?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.worker?.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.project?.title?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Performance Overview</h1>
-                <Button
-                    className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-                    onClick={handleAdd}
-                >
-                    <Plus className="mr-2 h-4 w-4" /> Record Performance
-                </Button>
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="relative w-full sm:w-64">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                                <Input
+                                    className="pl-9 h-10 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800"
+                                    placeholder="Search by worker or role..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Filter performance records</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    <Button
+                        className="bg-blue-600 hover:bg-blue-700 shrink-0"
+                        onClick={handleAdd}
+                        tooltip="Record new performance"
+                    >
+                        <Plus className="mr-2 h-4 w-4" /> Record Performance
+                    </Button>
+                </div>
             </div>
 
             <UpdatePerformanceDialog
@@ -77,7 +110,7 @@ export default function PerformancePage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {records.map((record) => (
+                                {filteredRecords.map((record) => (
                                     <TableRow key={record._id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
@@ -126,10 +159,10 @@ export default function PerformancePage() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
-                                {records.length === 0 && !isLoading && (
+                                {filteredRecords.length === 0 && !isLoading && (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center py-10 text-gray-500">
-                                            No performance records found.
+                                        <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                                            {searchQuery ? `No results found for "${searchQuery}"` : "No performance records found."}
                                         </TableCell>
                                     </TableRow>
                                 )}
