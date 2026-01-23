@@ -59,21 +59,21 @@ export default function ForgotPasswordPage() {
                             <Mail className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                         <h2 className="text-2xl font-bold">Check your email</h2>
-                        <p className="text-gray-500">
-                            We sent a verification code to <span className="font-medium text-black">{email}</span>
+                        <p className="text-gray-500 dark:text-gray-400">
+                            We sent a verification code to <span className="font-medium text-gray-900 dark:text-gray-50">{email}</span>
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             Enter the 4-digit code sent to your email to reset your password.
                         </p>
 
                         <Button
-                            className="w-full bg-black hover:bg-gray-800 h-11"
+                            className="w-full bg-black hover:bg-gray-800 h-11 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                             onClick={() => window.location.href = `/verify?email=${encodeURIComponent(email)}&mode=reset`}
                         >
                             Enter Code
                         </Button>
 
-                        <button onClick={() => setIsSubmitted(false)} className="text-sm text-gray-500 hover:text-black flex items-center justify-center w-full gap-2">
+                        <button onClick={() => setIsSubmitted(false)} className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 flex items-center justify-center w-full gap-2">
                             <ArrowLeft className="w-4 h-4" /> Back to email
                         </button>
                     </div>
@@ -103,8 +103,8 @@ export default function ForgotPasswordPage() {
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-left">
                         {/* Logo removed from here */}
-                        <h2 className="text-3xl font-bold tracking-tight mt-8">Forgot password?</h2>
-                        <p className="mt-2 text-sm text-gray-500">
+                        <h2 className="text-3xl font-bold tracking-tight mt-8 text-gray-900 dark:text-gray-50">Forgot password?</h2>
+                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             Enter your email address and we'll send you a code to reset your password.
                         </p>
                     </div>
@@ -122,13 +122,13 @@ export default function ForgotPasswordPage() {
                                 className="h-11"
                             />
                         </div>
-                        <Button type="submit" className="w-full bg-black hover:bg-gray-800 h-11" isLoading={isLoading}>
+                        <Button type="submit" className="w-full bg-black hover:bg-gray-800 h-11 dark:bg-white dark:text-black dark:hover:bg-gray-200" isLoading={isLoading}>
                             Send Code
                         </Button>
                     </form>
 
-                    <div className="text-center border-t pt-6">
-                        <Link href="/login" className="flex items-center justify-center text-sm text-gray-500 hover:text-black font-medium transition-colors">
+                    <div className="text-center border-t pt-6 border-gray-200 dark:border-gray-800">
+                        <Link href="/login" className="flex items-center justify-center text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 font-medium transition-colors">
                             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Login
                         </Link>
                     </div>

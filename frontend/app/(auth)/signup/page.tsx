@@ -160,22 +160,22 @@ export default function SignupPage() {
                             <input
                                 type="checkbox"
                                 id="terms"
-                                className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                                className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-50 dark:focus:ring-gray-50"
                                 checked={formData.terms}
                                 onChange={(e) => setFormData({ ...formData, terms: e.target.checked })}
                             />
-                            <label htmlFor="terms" className="text-sm text-gray-700">
-                                I agree to the <Link href="#" className="text-black font-semibold hover:underline">Terms of Service</Link> and <Link href="#" className="text-black font-semibold hover:underline">Privacy Policy</Link>
+                            <label htmlFor="terms" className="text-sm text-gray-700 dark:text-gray-300">
+                                I agree to the <Link href="#" className="text-gray-900 font-semibold hover:underline dark:text-gray-50">Terms of Service</Link> and <Link href="#" className="text-gray-900 font-semibold hover:underline dark:text-gray-50">Privacy Policy</Link>
                             </label>
                         </div>
 
-                        <Button type="submit" className="w-full h-11 text-base bg-black hover:bg-gray-800 text-white" isLoading={isLoading}>
+                        <Button type="submit" className="w-full h-11 text-base bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200" isLoading={isLoading}>
                             Create Account
                         </Button>
 
-                        <div className="text-center text-sm text-gray-500">
+                        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                             Already have an account?{" "}
-                            <Link href="/login" className="font-semibold text-black hover:underline">
+                            <Link href="/login" className="font-semibold text-gray-900 hover:underline dark:text-gray-50">
                                 Log in
                             </Link>
                         </div>

@@ -1,5 +1,7 @@
 'use client';
 
+import { ThemeToggle } from '@/components/theme-toggle';
+
 import { Bell, Search, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
@@ -65,6 +67,7 @@ export function Header({ onMenuClick, isMobileMenuOpen }: HeaderProps) {
             </div>
 
             <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                <ThemeToggle />
                 <Button variant="ghost" size="icon" className="relative text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 h-9 w-9" tooltip="Notifications">
                     <Bell className="h-5 w-5" />
                     <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-950"></span>
