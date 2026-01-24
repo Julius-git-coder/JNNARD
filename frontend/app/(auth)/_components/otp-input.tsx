@@ -61,7 +61,7 @@ export function OTPInput({ length = 4, onComplete }: OTPInputProps) {
                     className={cn(
                         "w-12 h-14 text-center text-2xl font-bold rounded-lg border-2 ring-offset-background",
                         "focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none transition-all duration-200",
-                        digit ? "border-blue-600 bg-blue-50/10" : "border-gray-200 bg-transparent"
+                        digit ? "border-blue-600 bg-blue-50/10" : "border-gray-200 dark:border-gray-800 bg-transparent"
                     )}
                 />
             ))}
