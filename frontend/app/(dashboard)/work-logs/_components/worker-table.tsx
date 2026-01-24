@@ -8,6 +8,8 @@ import { Worker } from '@/hooks/useWorkers';
 import { Button } from '@/components/ui/button';
 import { Edit2, Shield, UserMinus } from 'lucide-react';
 import { workerApi } from '@/lib/api';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface WorkerTableProps {
     workers: Worker[];
@@ -16,13 +18,23 @@ interface WorkerTableProps {
 }
 
 export function WorkerTable({ workers, onUpdate, onEdit }: WorkerTableProps) {
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to remove this worker?')) return;
+    const [idToDelete, setIdToDelete] = React.useState<string | null>(null);
+
+    const handleDelete = (id: string) => {
+        setIdToDelete(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!idToDelete) return;
         try {
-            await workerApi.delete(id);
+            const worker = workers.find(w => w._id === idToDelete);
+            await workerApi.delete(idToDelete);
+            handleSuccess(`${worker?.name || 'Worker'} has been removed from the team.`);
             onUpdate();
         } catch (error) {
-            console.error("Failed to delete worker:", error);
+            handleError(error, "Failed to remove team member.");
+        } finally {
+            setIdToDelete(null);
         }
     };
 
@@ -85,6 +97,15 @@ export function WorkerTable({ workers, onUpdate, onEdit }: WorkerTableProps) {
                     </TableBody>
                 </Table>
             </div>
+
+            <ConfirmationDialog
+                open={!!idToDelete}
+                onOpenChange={(open) => !open && setIdToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Remove Team Member"
+                description="Are you sure you want to remove this member from the team? This will not delete their historical work logs."
+                confirmLabel="Remove Member"
+            />
         </div>
     );
 }

@@ -63,6 +63,7 @@ export function AttachmentManager({ projectId, initialAttachments, onUpdate }: A
                 attachments: updatedAttachments
             });
 
+            handleSuccess("Attachment removed successfully.");
             onUpdate();
         } catch (error) {
             handleError(error, "Failed to remove attachment.");

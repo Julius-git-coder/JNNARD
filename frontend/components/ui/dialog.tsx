@@ -85,14 +85,18 @@ export function DialogContent({ children, className }: { children: React.ReactNo
     );
 }
 
-export function DialogHeader({ children }: { children: React.ReactNode }) {
-    return <div className="space-y-1.5 mb-4">{children}</div>;
+export function DialogHeader({ children, className }: { children: React.ReactNode; className?: string }) {
+    return <div className={cn("space-y-1.5 mb-4", className)}>{children}</div>;
 }
 
-export function DialogTitle({ children }: { children: React.ReactNode }) {
-    return <h2 className="text-xl font-semibold">{children}</h2>;
+export function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+    return <h2 className={cn("text-xl font-semibold", className)}>{children}</h2>;
 }
 
-export function DialogFooter({ children }: { children: React.ReactNode }) {
-    return <div className="mt-6 flex justify-end gap-3">{children}</div>;
+export function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }) {
+    return <p className={cn("text-sm text-gray-500", className)}>{children}</p>;
+}
+
+export function DialogFooter({ children, className }: { children: React.ReactNode; className?: string }) {
+    return <div className={cn("mt-6 flex justify-end gap-3", className)}>{children}</div>;
 }

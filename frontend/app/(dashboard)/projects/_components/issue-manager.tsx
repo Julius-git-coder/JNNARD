@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { projectApi } from '@/lib/api';
 import { MessageSquare, Plus, AlertCircle } from 'lucide-react';
-import { handleError } from '@/lib/error-handler';
+import { handleError, handleSuccess } from '@/lib/error-handler';
 
 interface Issue {
     _id?: string;
@@ -56,6 +56,7 @@ export function IssueManager({ projectId, initialIssues, onUpdate }: IssueManage
             }
 
             setNewIssue('');
+            handleSuccess("Your message has been posted.");
             onUpdate();
         } catch (error) {
             handleError(error, "Failed to add issue.");

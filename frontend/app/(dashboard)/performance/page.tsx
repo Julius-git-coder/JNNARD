@@ -18,11 +18,13 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 export default function PerformancePage() {
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
     const [recordToEdit, setRecordToEdit] = useState<PerformanceRecord | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [idToDelete, setIdToDelete] = useState<string | null>(null);
     const { records, isLoading, refreshRecords } = usePerformance();
 
     const handleEdit = (record: PerformanceRecord) => {
@@ -36,13 +38,19 @@ export default function PerformancePage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this performance record?')) return;
+        setIdToDelete(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!idToDelete) return;
         try {
-            await performanceApi.delete(id);
+            await performanceApi.delete(idToDelete);
             handleSuccess('Performance record deleted successfully.');
             refreshRecords();
         } catch (error) {
             handleError(error, 'Failed to delete performance record.');
+        } finally {
+            setIdToDelete(null);
         }
     };
 
@@ -171,6 +179,15 @@ export default function PerformancePage() {
                     </div>
                 </div>
             </div>
+
+            <ConfirmationDialog
+                open={!!idToDelete}
+                onOpenChange={(open) => !open && setIdToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Delete Performance Record"
+                description="Are you sure you want to delete this performance record? This action cannot be undone."
+                confirmLabel="Delete Record"
+            />
         </div>
     );
 }
