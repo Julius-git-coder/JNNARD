@@ -12,27 +12,18 @@ export const metadata: Metadata = {
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 
-import { ThemeProvider } from '@/components/theme-provider'
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
-          <Toaster position="top-center" richColors />
-        </ThemeProvider>
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   )

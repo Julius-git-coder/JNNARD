@@ -90,7 +90,7 @@ export default function ProjectsPage() {
                                 key={i}
                                 variant={currentPage === i + 1 ? 'default' : 'secondary'}
                                 size="icon"
-                                className={currentPage === i + 1 ? "bg-blue-900 text-white hover:bg-blue-800" : "bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-700"}
+                                className={currentPage === i + 1 ? "bg-blue-900 text-white hover:bg-blue-800" : "bg-gray-200 text-gray-900 hover:bg-gray-300"}
                                 onClick={() => setCurrentPage(i + 1)}
                                 tooltip={`Go to page ${i + 1}`}
                             >

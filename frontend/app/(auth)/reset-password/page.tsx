@@ -72,7 +72,7 @@ function ResetPasswordContent() {
                         Your password has been successfully reset. Click below to log in securely.
                     </p>
                     <Button
-                        className="w-full bg-black hover:bg-gray-800 h-11 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                        className="w-full bg-black hover:bg-gray-800 h-11"
                         onClick={() => window.location.href = '/login'}
                     >
                         Continue to Login
@@ -129,7 +129,7 @@ function ResetPasswordContent() {
                             />
                         </div>
 
-                        <Button type="submit" className="w-full bg-black hover:bg-gray-800 mt-2 dark:bg-white dark:text-black dark:hover:bg-gray-200" isLoading={isLoading}>
+                        <Button type="submit" className="w-full bg-black hover:bg-gray-800 mt-2" isLoading={isLoading}>
                             Reset Password
                         </Button>
                     </form>

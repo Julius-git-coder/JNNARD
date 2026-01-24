@@ -63,7 +63,7 @@ export function DialogContent({ children, className }: { children: React.ReactNo
                 onClick={() => onOpenChange(false)}
             />
             <div className={cn(
-                "relative bg-white dark:bg-gray-950 dark:text-gray-50 rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-in zoom-in-95 duration-200",
+                "relative bg-white dark:bg-gray-950 rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-in zoom-in-95 duration-200",
                 className
             )}>
                 <Tooltip>
