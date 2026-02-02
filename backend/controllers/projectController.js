@@ -1,4 +1,6 @@
 import Project from '../models/Project.js';
+import Worker from '../models/Worker.js';
+import { createNotification } from './notificationController.js';
 import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all projects
@@ -44,6 +46,23 @@ export const createProject = async (req, res) => {
             endDate,
             members, // Expecting array of Worker ObjectIds
         });
+
+        // Notify all project members
+        if (members && members.length > 0) {
+            for (const workerId of members) {
+                const worker = await Worker.findById(workerId);
+                if (worker && worker.userId) {
+                    await createNotification({
+                        recipient: worker.userId,
+                        sender: req.user?._id,
+                        type: 'GENERAL',
+                        title: 'Added to New Project',
+                        message: `You have been added to the project: ${title}`,
+                        link: '/worker/projects'
+                    });
+                }
+            }
+        }
         res.status(201).json(project);
     } catch (error) {
         sendError(res, 400, 'Failed to create project. Please verify that all required fields are correctly filled.', error);
@@ -81,6 +100,23 @@ export const updateProject = async (req, res) => {
 
             const updatedProject = await project.save();
             const populatedProject = await updatedProject.populate('members', 'name role avatar');
+
+            // Notify members about project updates
+            if (populatedProject.members && populatedProject.members.length > 0) {
+                for (const member of populatedProject.members) {
+                    if (member.userId) {
+                        await createNotification({
+                            recipient: member.userId,
+                            sender: req.user?._id,
+                            type: 'GENERAL',
+                            title: 'Project Updated',
+                            message: `The project "${populatedProject.title}" has been updated by Admin.`,
+                            link: '/worker/projects'
+                        });
+                    }
+                }
+            }
+
             res.json(populatedProject);
         } else {
             sendError(res, 404, 'The project you are attempting to update was not found.');

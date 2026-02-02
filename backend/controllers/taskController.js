@@ -1,4 +1,6 @@
 import Task from '../models/Task.js';
+import Worker from '../models/Worker.js';
+import { createNotification } from './notificationController.js';
 import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all tasks
@@ -58,11 +60,27 @@ export const createTask = async (req, res) => {
             description,
             project,
             assignedTo,
-            status,
-            priority,
-            dueDate,
+            status: status || 'To Do',
+            priority: priority || 'Medium',
+            dueDate: dueDate || null,
             deliverables
         });
+
+        // Send Notification to assigned worker
+        if (assignedTo) {
+            const worker = await Worker.findById(assignedTo);
+            if (worker && worker.userId) {
+                await createNotification({
+                    recipient: worker.userId,
+                    sender: req.user?._id,
+                    type: 'TASK_ASSIGNED',
+                    title: 'New Task Assigned',
+                    message: `You have been assigned a new task: ${title}`,
+                    link: '/worker/tasks'
+                });
+            }
+        }
+
         res.status(201).json(task);
     } catch (error) {
         sendError(res, 400, 'Failed to create task. Please ensure all required fields are correctly filled.', error);
@@ -112,6 +130,25 @@ export const updateTask = async (req, res) => {
             { $set: updateData },
             { new: true, runValidators: true }
         ).populate('project', 'title').populate('assignedTo', 'name avatar role');
+
+        // Notify current worker of task edits
+        if (updatedTask.assignedTo) {
+            const worker = await Worker.findById(updatedTask.assignedTo);
+            if (worker && worker.userId) {
+                const isNewAssignee = assignedTo && assignedTo.toString() !== task.assignedTo?.toString();
+
+                await createNotification({
+                    recipient: worker.userId,
+                    sender: req.user?._id,
+                    type: 'TASK_ASSIGNED',
+                    title: isNewAssignee ? 'New Task Assigned' : 'Task Details Updated',
+                    message: isNewAssignee
+                        ? `You have been assigned to the task: ${updatedTask.title}`
+                        : `Details for task "${updatedTask.title}" have been updated by Admin.`,
+                    link: '/worker/tasks'
+                });
+            }
+        }
 
         res.json(updatedTask);
     } catch (error) {

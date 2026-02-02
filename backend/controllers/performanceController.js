@@ -1,4 +1,6 @@
 import Performance from '../models/Performance.js';
+import Worker from '../models/Worker.js';
+import { createNotification } from './notificationController.js';
 import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all performance records
@@ -48,6 +50,21 @@ export const createPerformanceRecord = async (req, res) => {
             status,
             notes
         });
+
+        // Notify member about performance evaluation
+        if (worker) {
+            const workerObj = await Worker.findById(worker);
+            if (workerObj && workerObj.userId) {
+                await createNotification({
+                    recipient: workerObj.userId,
+                    sender: req.user?._id,
+                    type: 'GENERAL',
+                    title: 'New Performance Evaluation',
+                    message: `A new performance evaluation has been added for metric: ${metric}`,
+                    link: '/dashboard' // Link to their dashboard/overview
+                });
+            }
+        }
         res.status(201).json(record);
     } catch (error) {
         sendError(res, 400, 'Failed to create performance record. Please ensure all required fields are correctly filled.', error);
@@ -72,6 +89,22 @@ export const updatePerformanceRecord = async (req, res) => {
             record.task = req.body.task || record.task;
 
             const updatedRecord = await record.save();
+
+            // Notify worker about update
+            if (updatedRecord.worker) {
+                const workerObj = await Worker.findById(updatedRecord.worker);
+                if (workerObj && workerObj.userId) {
+                    await createNotification({
+                        recipient: workerObj.userId,
+                        sender: req.user?._id,
+                        type: 'GENERAL',
+                        title: 'Performance Evaluation Updated',
+                        message: `Your performance evaluation for "${updatedRecord.metric}" has been updated.`,
+                        link: '/dashboard'
+                    });
+                }
+            }
+
             res.json(updatedRecord);
         } else {
             sendError(res, 404, 'The performance record you are attempting to update was not found.');

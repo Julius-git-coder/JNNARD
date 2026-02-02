@@ -55,6 +55,7 @@ export function useProjects() {
         setCurrentPage,
         totalPages,
         hasProjects: projects.length > 0,
+        allProjects: projects,
         refreshProjects: fetchProjects
     };
 }

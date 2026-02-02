@@ -91,38 +91,39 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: Create
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                    <DialogTitle>{task ? 'Edit Task' : 'Assign New Task'}</DialogTitle>
+            <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="pb-2 border-b">
+                    <DialogTitle className="text-xl font-bold">{task ? 'Edit Task' : 'Assign New Task'}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="task-title">Task Title</Label>
+                <form onSubmit={handleSubmit} className="space-y-8 py-8">
+                    <div className="space-y-3">
+                        <Label htmlFor="task-title" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Task Title</Label>
                         <Input
                             id="task-title"
-                            placeholder="Deliverable name"
+                            placeholder="e.g., Design System Update"
                             required
+                            className="h-11 shadow-sm focus:ring-2 focus:ring-blue-500/20"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="task-description">Description</Label>
+                    <div className="space-y-3">
+                        <Label htmlFor="task-description" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description</Label>
                         <Textarea
                             id="task-description"
-                            placeholder="Describe the task details..."
+                            placeholder="Provide a detailed overview of the task requirements..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="h-20"
+                            className="h-28 shadow-sm focus:ring-2 focus:ring-blue-500/20 resize-none"
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Project</Label>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                            <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Project</Label>
                             <Select value={projectId} onValueChange={setProjectId}>
-                                <SelectTrigger>
+                                <SelectTrigger className="h-11 shadow-sm">
                                     <SelectValue placeholder="Select project" />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-[200px]">
@@ -132,37 +133,39 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: Create
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Assign To</Label>
+                        <div className="space-y-3">
+                            <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Assign To</Label>
                             <Select value={workerId} onValueChange={setWorkerId}>
-                                <SelectTrigger>
+                                <SelectTrigger className="h-11 shadow-sm">
                                     <SelectValue placeholder="Select worker" />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-[200px]">
                                     {workers.map(w => (
                                         <SelectItem key={w._id} value={w._id}>
-                                            <div className="flex items-center gap-2">
-                                                <Avatar className="h-4 w-4">
+                                            <div className="flex items-center gap-4 py-2 w-full">
+                                                <Avatar className="h-10 w-10 shrink-0 border border-gray-100 dark:border-gray-800 shadow-sm">
                                                     <AvatarImage src={w.avatar} />
-                                                    <AvatarFallback>{w.name[0]}</AvatarFallback>
+                                                    <AvatarFallback className="bg-blue-50 text-blue-600 font-bold">{w.name[0]}</AvatarFallback>
                                                 </Avatar>
-                                                <span>{w.name} <span className="text-xs text-gray-500">({w.role})</span></span>
+                                                <div className="flex flex-col gap-0.5 overflow-hidden">
+                                                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{w.name}</span>
+                                                    <span className="text-[11px] font-medium text-gray-500 uppercase tracking-tight truncate">{w.role}</span>
+                                                </div>
                                             </div>
-                                        </SelectItem>
-                                    ))}
+                                        </SelectItem>))}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Priority</Label>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                            <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Priority Level</Label>
                             <Select
                                 value={priority}
                                 onValueChange={(val: any) => setPriority(val)}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="h-11 shadow-sm">
                                     <SelectValue placeholder="Select priority" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -172,21 +175,22 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: Create
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Due Date</Label>
+                        <div className="space-y-3">
+                            <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Target Due Date</Label>
                             <Input
                                 type="date"
+                                className="h-11 shadow-sm"
                                 value={dueDate}
                                 onChange={(e) => setDueDate(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>Expected Deliverables</Label>
+                    <div className="space-y-3">
+                        <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Expected Deliverables</Label>
                         <Textarea
-                            placeholder="What is the expected outcome?"
-                            className="h-20"
+                            placeholder="What specific artifacts or results are expected?"
+                            className="h-28 shadow-sm focus:ring-2 focus:ring-blue-500/20 resize-none"
                             value={deliverables}
                             onChange={(e) => setDeliverables(e.target.value)}
                         />

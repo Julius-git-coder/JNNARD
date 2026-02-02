@@ -7,17 +7,19 @@ import {
     deletePerformanceRecord,
 } from '../controllers/performanceController.js';
 
+import { protect, admin } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
 
 router.route('/')
-    .get(getPerformanceRecords)
-    .post(createPerformanceRecord);
+    .get(protect, getPerformanceRecords)
+    .post(protect, admin, createPerformanceRecord);
 
 router.route('/worker/:workerId')
-    .get(getPerformanceByWorker);
+    .get(protect, getPerformanceByWorker);
 
 router.route('/:id')
-    .put(updatePerformanceRecord)
-    .delete(deletePerformanceRecord);
+    .put(protect, admin, updatePerformanceRecord)
+    .delete(protect, admin, deletePerformanceRecord);
 
 export default router;

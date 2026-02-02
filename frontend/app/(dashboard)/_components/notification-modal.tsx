@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Notification } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 import { Bell, Check, UserPlus, FileText, AlertCircle, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface NotificationModalProps {
     open: boolean;
@@ -30,6 +31,18 @@ export function NotificationModal({
     onMarkAsRead,
     onMarkAllAsRead
 }: NotificationModalProps) {
+    const router = useRouter();
+
+    const handleNotificationClick = (notification: Notification) => {
+        if (!notification.isRead) {
+            onMarkAsRead(notification._id);
+        }
+
+        if (notification.link) {
+            router.push(notification.link);
+            onOpenChange(false);
+        }
+    };
 
     const getIcon = (type: string) => {
         switch (type) {
@@ -80,7 +93,7 @@ export function NotificationModal({
                                         "p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer group relative",
                                         !notification.isRead && "bg-blue-50/50 dark:bg-blue-900/10"
                                     )}
-                                    onClick={() => !notification.isRead && onMarkAsRead(notification._id)}
+                                    onClick={() => handleNotificationClick(notification)}
                                 >
                                     <div className="flex gap-3">
                                         <div className="mt-1 flex-shrink-0 p-2 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-800">
