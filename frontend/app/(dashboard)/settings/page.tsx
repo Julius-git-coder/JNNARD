@@ -70,13 +70,16 @@ export default function SettingsPage() {
             const response = await authApi.updateProfile(data);
             const result = response.data;
 
-            // Update local storage
-            localStorage.setItem('user', JSON.stringify({
+            // Update local storage preserving role/workerProfile
+            const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const updatedUserData = {
+                ...storedUser,
                 name: result.name,
                 email: result.email,
                 avatar: result.avatar
-            }));
-            setUser(result);
+            };
+            localStorage.setItem('user', JSON.stringify(updatedUserData));
+            setUser(updatedUserData);
             handleSuccess('Your profile has been updated successfully!');
 
             // Dispatch event for header to update

@@ -13,6 +13,7 @@ export interface Task {
     dueDate?: string;
     project: { _id: string; title: string };
     assignedTo?: { _id: string; name: string; avatar?: string };
+    deliverables?: string;
 }
 
 export function useTasks(projectId?: string) {

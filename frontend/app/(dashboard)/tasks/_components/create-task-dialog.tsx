@@ -13,21 +13,36 @@ import { useWorkers } from '@/hooks/useWorkers';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { handleError, handleSuccess } from '@/lib/error-handler';
 
+import { Task } from '@/hooks/useTasks';
+
 interface CreateTaskDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess: () => void;
+    task?: Task;
 }
 
-export function CreateTaskDialog({ open, onOpenChange, onSuccess }: CreateTaskDialogProps) {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [projectId, setProjectId] = useState('');
-    const [workerId, setWorkerId] = useState('');
-    const [priority, setPriority] = useState('Medium');
-    const [dueDate, setDueDate] = useState('');
-    const [deliverables, setDeliverables] = useState('');
+export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: CreateTaskDialogProps) {
+    const [title, setTitle] = useState(task?.title || '');
+    const [description, setDescription] = useState(task?.description || '');
+    const [projectId, setProjectId] = useState(task?.project?._id || '');
+    const [workerId, setWorkerId] = useState(task?.assignedTo?._id || '');
+    const [priority, setPriority] = useState<'Low' | 'Medium' | 'High'>(task?.priority || 'Medium');
+    const [dueDate, setDueDate] = useState(task?.dueDate ? task.dueDate.split('T')[0] : '');
+    const [deliverables, setDeliverables] = useState(task?.deliverables || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    React.useEffect(() => {
+        if (open) {
+            setTitle(task?.title || '');
+            setDescription(task?.description || '');
+            setProjectId(task?.project?._id || '');
+            setWorkerId(task?.assignedTo?._id || '');
+            setPriority(task?.priority || 'Medium');
+            setDueDate(task?.dueDate ? task.dueDate.split('T')[0] : '');
+            setDeliverables(task?.deliverables || '');
+        }
+    }, [open, task]);
 
     const { projects } = useProjects();
     const { workers } = useWorkers();
@@ -36,28 +51,39 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess }: CreateTaskDi
         e.preventDefault();
         try {
             setIsSubmitting(true);
-            await taskApi.create({
+            const taskData: any = {
                 title,
                 description,
                 project: projectId,
-                assignedTo: workerId || undefined,
+                assignedTo: workerId || null,
                 priority,
-                dueDate: dueDate || undefined,
+                dueDate: dueDate || null,
                 deliverables,
-            });
-            handleSuccess('Task has been assigned successfully.');
+            };
+
+            if (task) {
+                // Keep the current status when editing via this dialog
+                taskData.status = task.status;
+                await taskApi.update(task._id, taskData);
+                handleSuccess('Task has been updated successfully.');
+            } else {
+                await taskApi.create(taskData);
+                handleSuccess('Task has been assigned successfully.');
+            }
             onSuccess();
             onOpenChange(false);
-            // Reset
-            setTitle('');
-            setDescription('');
-            setProjectId('');
-            setWorkerId('');
-            setPriority('Medium');
-            setDueDate('');
-            setDeliverables('');
+            if (!task) {
+                // Reset only if creating
+                setTitle('');
+                setDescription('');
+                setProjectId('');
+                setWorkerId('');
+                setPriority('Medium');
+                setDueDate('');
+                setDeliverables('');
+            }
         } catch (error) {
-            handleError(error, "Failed to create task.");
+            handleError(error, task ? "Failed to update task." : "Failed to create task.");
         } finally {
             setIsSubmitting(false);
         }
@@ -67,7 +93,7 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess }: CreateTaskDi
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Assign New Task</DialogTitle>
+                    <DialogTitle>{task ? 'Edit Task' : 'Assign New Task'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="space-y-2">
@@ -121,7 +147,10 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess }: CreateTaskDi
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Priority</Label>
-                            <Select value={priority} onValueChange={setPriority}>
+                            <Select
+                                value={priority}
+                                onValueChange={(val: any) => setPriority(val)}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select priority" />
                                 </SelectTrigger>
@@ -155,7 +184,7 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess }: CreateTaskDi
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                         <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
-                            {isSubmitting ? 'Assigning...' : 'Assign Task'}
+                            {isSubmitting ? (task ? 'Updating...' : 'Assigning...') : (task ? 'Update Task' : 'Assign Task')}
                         </Button>
                     </DialogFooter>
                 </form>

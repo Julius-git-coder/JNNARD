@@ -5,12 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { MoreVertical, Paperclip, MessageSquare, Edit2, Timer } from 'lucide-react';
+import { MoreVertical, Paperclip, MessageSquare, Edit2, Timer, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AttachmentManager } from './attachment-manager';
 import { IssueManager } from './issue-manager';
 import { CreateProjectDialog } from './create-project-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { projectApi } from '@/lib/api';
+import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 interface ProjectCardProps {
     id: string;
@@ -42,6 +45,33 @@ export const ProjectCard = ({
     const [isManageOpen, setIsManageOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isIssuesOpen, setIsIssuesOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+    const isAdmin = user?.role === 'admin';
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+            await projectApi.delete(id);
+            toast.success('Project deleted successfully');
+            onUpdate();
+            setIsDeleteOpen(false);
+        } catch (error: any) {
+            console.error('Delete project error:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete project');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     const statusVariant =
         status === 'Completed' ? 'completed' :
@@ -58,15 +88,55 @@ export const ProjectCard = ({
                     </Badge>
                 </div>
                 <div className="flex items-center gap-1">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => setIsEditOpen(true)}
-                        tooltip="Edit Project"
-                    >
-                        <Edit2 className="h-4 w-4" />
-                    </Button>
+                    {isAdmin && (
+                        <>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                onClick={() => setIsEditOpen(true)}
+                                tooltip="Edit Project"
+                            >
+                                <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                                <DialogTrigger>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        tooltip="Delete Project"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Delete Project</DialogTitle>
+                                        <DialogDescription>
+                                            Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-gray-50">{title}</span>? This action cannot be undone.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="gap-2 sm:gap-0">
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setIsDeleteOpen(false)}
+                                            disabled={isDeleting}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={handleDelete}
+                                            disabled={isDeleting}
+                                        >
+                                            {isDeleting ? 'Deleting...' : 'Delete Project'}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </>
+                    )}
                     <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
                         <DialogTrigger>
                             <Button variant="ghost" size="icon" className="h-8 w-8" tooltip="Project Assets">

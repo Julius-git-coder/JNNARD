@@ -74,4 +74,10 @@ export const uploadApi = {
     },
 };
 
+export const notificationApi = {
+    getAll: () => api.get('/notifications'),
+    markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
+    markAllAsRead: () => api.put('/notifications/read-all'),
+};
+
 export default api;

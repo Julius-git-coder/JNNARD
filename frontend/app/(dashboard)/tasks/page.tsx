@@ -10,8 +10,19 @@ import { CreateTaskDialog } from './_components/create-task-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function TasksPage() {
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { tasks, isLoading, refreshTasks } = useTasks();
+
+    const handleCreate = () => {
+        setSelectedTask(null);
+        setIsDialogOpen(true);
+    };
+
+    const handleEdit = (task: Task) => {
+        setSelectedTask(task);
+        setIsDialogOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -19,7 +30,7 @@ export default function TasksPage() {
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Tasks</h1>
                 <Button
                     className="bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setIsCreateDialogOpen(true)}
+                    onClick={handleCreate}
                     tooltip="Create new task"
                 >
                     <Plus className="mr-2 h-4 w-4" /> New Task
@@ -27,9 +38,10 @@ export default function TasksPage() {
             </div>
 
             <CreateTaskDialog
-                open={isCreateDialogOpen}
-                onOpenChange={setIsCreateDialogOpen}
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
                 onSuccess={refreshTasks}
+                task={selectedTask || undefined}
             />
 
             {isLoading ? (
@@ -40,13 +52,13 @@ export default function TasksPage() {
                     <Skeleton className="h-10 w-full" />
                 </div>
             ) : tasks.length > 0 ? (
-                <TaskTable tasks={tasks} onUpdate={refreshTasks} />
+                <TaskTable tasks={tasks} onUpdate={refreshTasks} onEdit={handleEdit} />
             ) : (
                 <EmptyState
                     title="No tasks found"
                     description="Get started by assigning your first task."
                     actionLabel="Create Task"
-                    onAction={() => setIsCreateDialogOpen(true)}
+                    onAction={handleCreate}
                 />
             )}
         </div>

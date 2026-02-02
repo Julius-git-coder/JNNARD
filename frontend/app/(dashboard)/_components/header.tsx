@@ -10,6 +10,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useNotifications } from '@/hooks/useNotifications';
+import { NotificationModal } from './notification-modal';
 
 interface HeaderProps {
     onMenuClick?: () => void;
@@ -18,6 +20,14 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, isMobileMenuOpen }: HeaderProps) {
     const [user, setUser] = useState<any>(null);
+    const {
+        notifications,
+        unreadCount,
+        markAsRead,
+        markAllAsRead,
+        fetchNotifications
+    } = useNotifications();
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
     useEffect(() => {
         const loadUser = () => {
@@ -66,10 +76,29 @@ export function Header({ onMenuClick, isMobileMenuOpen }: HeaderProps) {
             </div>
 
             <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                <Button variant="ghost" size="icon" className="relative text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 h-9 w-9" tooltip="Notifications">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 h-9 w-9"
+                    tooltip="Notifications"
+                    onClick={() => setIsNotificationOpen(true)}
+                >
                     <Bell className="h-5 w-5" />
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-950"></span>
+                    {unreadCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 h-4 min-w-[1rem] flex items-center justify-center px-1 rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-gray-950 animate-in fade-in zoom-in duration-300">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                    )}
                 </Button>
+
+                <NotificationModal
+                    open={isNotificationOpen}
+                    onOpenChange={setIsNotificationOpen}
+                    notifications={notifications}
+                    unreadCount={unreadCount}
+                    onMarkAsRead={markAsRead}
+                    onMarkAllAsRead={markAllAsRead}
+                />
 
                 <div className="flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 dark:border-gray-800">
                     <div className="text-right hidden lg:block">

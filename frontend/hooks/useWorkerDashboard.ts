@@ -2,10 +2,28 @@ import { useState, useEffect } from 'react';
 import { workerDashboardApi } from '@/lib/api';
 import { handleError } from '@/lib/error-handler';
 
+interface Project {
+    _id: string;
+    title: string;
+    description: string;
+    status: string;
+}
+
+interface Task {
+    _id: string;
+    title: string;
+    status: string;
+    dueDate?: string;
+    priority: string;
+    project?: {
+        title: string;
+    };
+}
+
 export function useWorkerDashboard() {
-    const [projects, setProjects] = useState([]);
-    const [tasks, setTasks] = useState([]);
-    const [performance, setPerformance] = useState([]);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [performance, setPerformance] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = async () => {

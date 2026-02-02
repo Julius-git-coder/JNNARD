@@ -9,6 +9,7 @@ import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import performanceRoutes from './routes/performanceRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import sendError from './utils/errorResponse.js';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend API is running...');

@@ -9,6 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { taskApi } from '@/lib/api';
 import { format } from 'date-fns';
 import { handleError, handleSuccess } from '@/lib/error-handler';
+import { Edit2, Trash2, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { CreateTaskDialog } from './create-task-dialog';
+import { useState, useEffect } from 'react';
 
 interface TaskTableProps {
     tasks: Task[];
@@ -16,6 +21,20 @@ interface TaskTableProps {
 }
 
 export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
+    const [user, setUser] = useState<any>(null);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+    const isAdmin = user?.role === 'admin';
+
     const handleStatusChange = async (taskId: string, newStatus: string) => {
         try {
             await taskApi.update(taskId, { status: newStatus });
@@ -23,6 +42,21 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
             onUpdate();
         } catch (error) {
             handleError(error, "Failed to update task status.");
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!deletingTaskId) return;
+        try {
+            setIsDeleting(true);
+            await taskApi.delete(deletingTaskId);
+            handleSuccess('Task deleted successfully.');
+            onUpdate();
+        } catch (error) {
+            handleError(error, "Failed to delete task.");
+        } finally {
+            setIsDeleting(false);
+            setDeletingTaskId(null);
         }
     };
 
@@ -38,6 +72,7 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                             <TableHead>Priority</TableHead>
                             <TableHead>Due Date</TableHead>
                             <TableHead>Status</TableHead>
+                            {isAdmin && <TableHead className="text-right">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -83,6 +118,30 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
+                                {isAdmin && (
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                onClick={() => setEditingTask(task)}
+                                                tooltip="Edit Task"
+                                            >
+                                                <Edit2 className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                onClick={() => setDeletingTaskId(task._id)}
+                                                tooltip="Delete Task"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
                         {tasks.length === 0 && (
@@ -95,6 +154,25 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                     </TableBody>
                 </Table>
             </div>
+
+            <CreateTaskDialog
+                open={!!editingTask}
+                onOpenChange={(open) => !open && setEditingTask(null)}
+                onSuccess={() => {
+                    onUpdate();
+                    setEditingTask(null);
+                }}
+                task={editingTask || undefined}
+            />
+
+            <ConfirmationDialog
+                open={!!deletingTaskId}
+                onOpenChange={(open) => !open && setDeletingTaskId(null)}
+                onConfirm={handleDelete}
+                title="Delete Task"
+                description="Are you sure you want to delete this task? This action cannot be undone."
+                isLoading={isDeleting}
+            />
         </div>
     );
 }

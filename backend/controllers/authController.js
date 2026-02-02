@@ -3,6 +3,7 @@ import Worker from '../models/Worker.js';
 import generateTokens from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import sendError from '../utils/errorResponse.js';
+import { createNotification } from './notificationController.js';
 
 // Random 4-digit OTP
 const generateOTP = () => {
@@ -28,11 +29,13 @@ export const register = async (req, res) => {
 
         const userRole = role === 'admin' ? 'admin' : 'worker';
 
+        const avatarUrl = file ? (file.url || file.path || file.secure_url) : '';
+
         let user = await User.create({
             name,
             email,
             password,
-            avatar: file ? file.path : '',
+            avatar: avatarUrl,
             otp,
             otpExpires,
             role: userRole
@@ -49,6 +52,19 @@ export const register = async (req, res) => {
             });
             user.workerProfile = worker._id;
             await user.save();
+
+            // Notify Admins
+            const admins = await User.find({ role: 'admin' });
+            for (const admin of admins) {
+                await createNotification({
+                    recipient: admin._id,
+                    sender: user._id,
+                    type: 'WORKER_SIGNUP',
+                    title: 'New Worker Registered',
+                    message: `${user.name} has signed up as a worker.`,
+                    link: '/workers' // Assuming there is a workers list page
+                });
+            }
         }
 
         // Send OTP Email
@@ -289,13 +305,22 @@ export const updateProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
 
+        console.log('--- PROFILE UPDATE DEBUG ---');
+        console.log('User ID:', req.user._id);
+        console.log('File:', req.file);
+        console.log('Body:', req.body);
+
         if (user) {
+            console.log('Found user:', user.email);
             user.name = req.body.name || user.name;
             user.email = req.body.email || user.email;
 
             if (req.file) {
-                user.avatar = req.file.path;
+                const newAvatar = req.file.url || req.file.path || req.file.secure_url;
+                console.log('New avatar from file:', newAvatar);
+                user.avatar = newAvatar;
             } else if (req.body.avatar) {
+                console.log('Avatar from body:', req.body.avatar);
                 user.avatar = req.body.avatar;
             }
 
@@ -304,6 +329,15 @@ export const updateProfile = async (req, res) => {
             }
 
             const updatedUser = await user.save();
+
+            // Sync: If worker has a profile, update its avatar too
+            if (updatedUser.workerProfile) {
+                await Worker.findByIdAndUpdate(updatedUser.workerProfile, {
+                    name: updatedUser.name,
+                    avatar: updatedUser.avatar,
+                    email: updatedUser.email
+                });
+            }
 
             res.json({
                 success: true,

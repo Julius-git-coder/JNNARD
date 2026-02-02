@@ -48,7 +48,7 @@ export const getTaskById = async (req, res) => {
 
 // @desc    Create a task
 // @route   POST /api/tasks
-// @access  Public
+// @access  Admin
 export const createTask = async (req, res) => {
     const { title, description, project, assignedTo, status, priority, dueDate, deliverables } = req.body;
 
@@ -71,26 +71,32 @@ export const createTask = async (req, res) => {
 
 // @desc    Update a task
 // @route   PUT /api/tasks/:id
-// @access  Public
+// @access  Admin
 export const updateTask = async (req, res) => {
     try {
-        const task = await Task.findById(req.params.id);
+        const { title, description, project, assignedTo, status, priority, dueDate, deliverables } = req.body;
 
-        if (task) {
-            task.title = req.body.title || task.title;
-            task.description = req.body.description || task.description;
-            task.project = req.body.project || task.project;
-            task.assignedTo = req.body.assignedTo || task.assignedTo;
-            task.status = req.body.status || task.status;
-            task.priority = req.body.priority || task.priority;
-            task.dueDate = req.body.dueDate || task.dueDate;
-            task.deliverables = req.body.deliverables || task.deliverables;
+        const updateData = {};
+        if (title !== undefined) updateData.title = title;
+        if (description !== undefined) updateData.description = description;
+        if (project !== undefined) updateData.project = project;
+        if (assignedTo !== undefined) updateData.assignedTo = assignedTo || null;
+        if (status !== undefined) updateData.status = status;
+        if (priority !== undefined) updateData.priority = priority;
+        if (dueDate !== undefined) updateData.dueDate = dueDate || null;
+        if (deliverables !== undefined) updateData.deliverables = deliverables;
 
-            const updatedTask = await task.save();
-            res.json(updatedTask);
-        } else {
-            sendError(res, 404, 'The task you are attempting to update was not found.');
+        const task = await Task.findByIdAndUpdate(
+            req.params.id,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        ).populate('project', 'title').populate('assignedTo', 'name avatar role');
+
+        if (!task) {
+            return sendError(res, 404, 'The task you are attempting to update was not found.');
         }
+
+        res.json(task);
     } catch (error) {
         sendError(res, 400, 'Failed to update task details. Please check your input and try again.', error);
     }
@@ -98,7 +104,7 @@ export const updateTask = async (req, res) => {
 
 // @desc    Delete a task
 // @route   DELETE /api/tasks/:id
-// @access  Public
+// @access  Admin
 export const deleteTask = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);

@@ -31,7 +31,7 @@ export const getProjectById = async (req, res) => {
 
 // @desc    Create a project
 // @route   POST /api/projects
-// @access  Public
+// @access  Admin
 export const createProject = async (req, res) => {
     const { title, description, status, startDate, endDate, members } = req.body;
 
@@ -52,7 +52,7 @@ export const createProject = async (req, res) => {
 
 // @desc    Update a project
 // @route   PUT /api/projects/:id
-// @access  Public
+// @access  Admin
 export const updateProject = async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
@@ -92,7 +92,7 @@ export const updateProject = async (req, res) => {
 
 // @desc    Delete a project
 // @route   DELETE /api/projects/:id
-// @access  Public
+// @access  Admin
 export const deleteProject = async (req, res) => {
     try {
         const project = await Project.findById(req.params.id);
