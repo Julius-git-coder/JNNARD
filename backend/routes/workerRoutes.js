@@ -9,11 +9,9 @@ import {
 
 const router = express.Router();
 
-router.route('/')
-    .get(getWorkers)
-    .post(createWorker);
-
-router.route('/:id')
+router.route('/').get(getWorkers).post(createWorker);
+router
+    .route('/:id')
     .get(getWorkerById)
     .put(updateWorker)
     .delete(deleteWorker);

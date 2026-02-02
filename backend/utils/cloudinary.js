@@ -9,7 +9,7 @@ cloudinary.config({
 });
 
 const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
+    cloudinary: { v2: cloudinary },
     params: {
         folder: 'jnard_uploads',
         allowed_formats: ['jpg', 'png', 'jpeg'],

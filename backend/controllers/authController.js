@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Worker from '../models/Worker.js';
 import generateTokens from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import sendError from '../utils/errorResponse.js';
@@ -13,7 +14,7 @@ const generateOTP = () => {
 // @access  Public
 export const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role } = req.body;
         const file = req.file; // From Multer
 
         const userExists = await User.findOne({ email });
@@ -25,14 +26,30 @@ export const register = async (req, res) => {
         const otp = generateOTP();
         const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-        const user = await User.create({
+        const userRole = role === 'admin' ? 'admin' : 'worker';
+
+        let user = await User.create({
             name,
             email,
             password,
             avatar: file ? file.path : '',
             otp,
-            otpExpires
+            otpExpires,
+            role: userRole
         });
+
+        // If worker, create worker profile
+        if (userRole === 'worker') {
+            const worker = await Worker.create({
+                name,
+                email,
+                role: 'Intern', // Default role label
+                avatar: user.avatar,
+                userId: user._id
+            });
+            user.workerProfile = worker._id;
+            await user.save();
+        }
 
         // Send OTP Email
         const message = `Your verification code is: ${otp}`;
@@ -95,6 +112,8 @@ export const verifyEmail = async (req, res) => {
             name: user.name,
             email: user.email,
             avatar: user.avatar,
+            role: user.role,
+            workerProfile: user.workerProfile,
             ...tokens,
             message: 'Your email has been verified successfully.'
         });
@@ -121,12 +140,36 @@ export const login = async (req, res) => {
 
             const tokens = generateTokens(user._id);
 
+            res.role = user.role;
+            res.workerProfile = user.workerProfile;
+
+            // Sync: If user is worker but has no profile, create one now
+            if (user.role === 'worker' && !user.workerProfile) {
+                let worker = await Worker.findOne({ email: user.email });
+                if (!worker) {
+                    worker = await Worker.create({
+                        name: user.name,
+                        email: user.email,
+                        role: 'Intern',
+                        avatar: user.avatar,
+                        userId: user._id
+                    });
+                } else {
+                    worker.userId = user._id;
+                    await worker.save();
+                }
+                user.workerProfile = worker._id;
+                await user.save();
+            }
+
             res.json({
                 success: true,
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
+                role: user.role,
+                workerProfile: user.workerProfile,
                 ...tokens
             });
         } else {

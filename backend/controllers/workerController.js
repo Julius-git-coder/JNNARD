@@ -1,4 +1,5 @@
 import Worker from '../models/Worker.js';
+import User from '../models/User.js';
 import sendError from '../utils/errorResponse.js';
 
 // @desc    Get all workers
@@ -44,12 +45,26 @@ export const createWorker = async (req, res) => {
             }
         }
 
+        // Create the worker
         const worker = await Worker.create({
             name,
             role,
             email,
             avatar,
         });
+
+        // Sync: If a User with this email already exists, link them bi-directionally
+        if (email) {
+            const user = await User.findOne({ email });
+            if (user) {
+                worker.userId = user._id;
+                await worker.save();
+
+                user.workerProfile = worker._id;
+                await user.save();
+            }
+        }
+
         res.status(201).json(worker);
     } catch (error) {
         sendError(res, 400, 'Failed to create worker. Please ensure all required fields are provided correctly.', error);

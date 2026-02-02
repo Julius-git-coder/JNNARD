@@ -14,6 +14,16 @@ export default function DashboardPage() {
     const { workers, isLoading: isWorkersLoading } = useWorkers();
 
     useEffect(() => {
+        const user = localStorage.getItem('user');
+        if (user) {
+            const parsedUser = JSON.parse(user);
+            if (parsedUser.role === 'worker') {
+                window.location.href = '/worker/dashboard';
+            }
+        }
+    }, []);
+
+    useEffect(() => {
         // Simulating loading for the top-level
         const timer = setTimeout(() => setIsLoading(false), 800);
         return () => clearTimeout(timer);

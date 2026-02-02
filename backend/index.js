@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import workerRoutes from './routes/workerRoutes.js';
+import workerDashboardRoutes from './routes/workerDashboardRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import performanceRoutes from './routes/performanceRoutes.js';
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workers', workerRoutes);
+app.use('/api/worker-dashboard', workerDashboardRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/performance', performanceRoutes);

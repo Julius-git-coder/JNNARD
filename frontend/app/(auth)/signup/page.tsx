@@ -17,6 +17,7 @@ export default function SignupPage() {
         email: '',
         password: '',
         confirmPassword: '',
+        role: 'worker', // Default role
         terms: false
     });
 
@@ -41,9 +42,11 @@ export default function SignupPage() {
             data.append('name', formData.fullName);
             data.append('email', formData.email);
             data.append('password', formData.password);
+            data.append('role', formData.role);
 
             const response = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
+                // Fetch automatically sets the correct Content-Type for FormData
                 body: data,
             });
 
@@ -94,6 +97,34 @@ export default function SignupPage() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+
+                        <div className="space-y-2">
+                            <Label>I am signing up as a:</Label>
+                            <div className="grid grid-cols-2 gap-4 pt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, role: 'worker' })}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${formData.role === 'worker'
+                                            ? 'border-black bg-gray-50 dark:bg-gray-900 dark:border-white shadow-sm'
+                                            : 'border-gray-100 hover:border-gray-200 text-gray-500'
+                                        }`}
+                                >
+                                    <span className="font-bold text-sm">Intern / Worker</span>
+                                    <span className="text-[10px] opacity-60">I'm here to work</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, role: 'admin' })}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${formData.role === 'admin'
+                                            ? 'border-black bg-gray-50 dark:bg-gray-900 dark:border-white shadow-sm'
+                                            : 'border-gray-100 hover:border-gray-200 text-gray-500'
+                                        }`}
+                                >
+                                    <span className="font-bold text-sm">Administrator</span>
+                                    <span className="text-[10px] opacity-60">I manage projects</span>
+                                </button>
+                            </div>
+                        </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="fullname">Full Name</Label>

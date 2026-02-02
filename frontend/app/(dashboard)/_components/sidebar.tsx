@@ -1,5 +1,4 @@
-'use client';
-
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -14,16 +13,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-const mainNavItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Project', href: '/projects', icon: Folder },
-    { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-    { name: 'Team', href: '/work-logs', icon: FileText },
-    { name: 'Performance', href: '/performance', icon: BarChart2 },
-];
-
-const settingsItem = { name: 'Settings', href: '/settings', icon: Settings };
-
 interface SidebarProps {
     isOpen?: boolean;
     onClose?: () => void;
@@ -31,9 +20,41 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
+    const [userRole, setUserRole] = useState<string | null>(null);
 
-    const renderNavItem = (item: typeof mainNavItems[0]) => {
-        const isActive = pathname === item.href || (item.href !== '/ dashboard' && pathname.startsWith(item.href));
+    useEffect(() => {
+        const user = localStorage.getItem('user');
+        if (user) {
+            try {
+                const parsedUser = JSON.parse(user);
+                setUserRole(parsedUser.role || 'worker');
+            } catch (e) {
+                console.error("Failed to parse user data", e);
+            }
+        }
+    }, []);
+
+    const adminNavItems = [
+        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'Project', href: '/projects', icon: Folder },
+        { name: 'Tasks', href: '/tasks', icon: CheckSquare },
+        { name: 'Team', href: '/work-logs', icon: FileText },
+        { name: 'Performance', href: '/performance', icon: BarChart2 },
+    ];
+
+    const workerNavItems = [
+        { name: 'Dashboard', href: '/worker/dashboard', icon: LayoutDashboard },
+        { name: 'My Projects', href: '/worker/projects', icon: Folder },
+        { name: 'My Tasks', href: '/worker/tasks', icon: CheckSquare },
+        { name: 'Weekly Reports', href: '/worker/reports', icon: FileText },
+        { name: 'My Performance', href: '/worker/performance', icon: BarChart2 },
+    ];
+
+    const navItems = userRole === 'admin' ? adminNavItems : workerNavItems;
+
+
+    const renderNavItem = (item: { name: string; href: string; icon: any }) => {
+        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
         return (
             <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
@@ -75,7 +96,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             )}>
                 <div className="flex flex-col h-full">
                     <div className="flex h-16 items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
-                        <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-gray-900 dark:text-gray-50">
+                        <Link href={userRole === 'admin' ? '/dashboard' : '/worker/dashboard'} className="flex items-center gap-2 font-bold text-xl text-gray-900 dark:text-gray-50">
                             <img src="/Dot.png" alt="Logo" className="h-8 w-8" />
                             JNARD
                         </Link>
@@ -96,12 +117,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                     <div className="flex-1 overflow-y-auto py-6 px-3">
                         <nav className="space-y-1">
-                            {mainNavItems.map(renderNavItem)}
+                            {navItems.map(renderNavItem)}
                         </nav>
                     </div>
 
                     <div className="px-3 py-6 border-t border-gray-100 dark:border-gray-800 shrink-0">
-                        {renderNavItem(settingsItem)}
+                        {renderNavItem({ name: 'Settings', href: '/settings', icon: Settings })}
                     </div>
                 </div>
             </aside>

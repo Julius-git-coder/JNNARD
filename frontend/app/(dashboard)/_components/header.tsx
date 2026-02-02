@@ -2,6 +2,7 @@
 
 import { Bell, Search, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -72,8 +73,20 @@ export function Header({ onMenuClick, isMobileMenuOpen }: HeaderProps) {
 
                 <div className="flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 dark:border-gray-800">
                     <div className="text-right hidden lg:block">
-                        <p className="text-sm font-medium leading-none text-gray-900 dark:text-gray-50">{user?.name || 'Guest'}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || 'Login'}</p>
+                        <div className="flex flex-col items-end">
+                            <p className="text-sm font-medium leading-none text-gray-900 dark:text-gray-50">{user?.name || 'Guest'}</p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <span className={cn(
+                                    "text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider",
+                                    user?.role === 'admin'
+                                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                                        : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                )}>
+                                    {user?.role || 'User'}
+                                </span>
+                                <span className="text-[10px] text-gray-400 dark:text-gray-500">{user?.email || 'Login'}</span>
+                            </div>
+                        </div>
                     </div>
                     <Tooltip>
                         <TooltipTrigger asChild>

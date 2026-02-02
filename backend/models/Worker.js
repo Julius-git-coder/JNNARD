@@ -24,6 +24,10 @@ const workerSchema = new mongoose.Schema(
             enum: ['Active', 'Inactive', 'Busy'],
             default: 'Active',
         },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
     },
     {
         timestamps: true,

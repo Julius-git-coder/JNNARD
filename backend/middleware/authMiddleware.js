@@ -14,7 +14,7 @@ export const protect = async (req, res, next) => {
 
             const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
-            req.user = await User.findById(decoded.id).select('-password');
+            req.user = await User.findById(decoded.id).select('-password').populate('workerProfile');
 
             if (!req.user) {
                 return sendError(res, 401, 'Your session is no longer valid. Please sign in again.');
@@ -26,5 +26,13 @@ export const protect = async (req, res, next) => {
         }
     } else {
         sendError(res, 401, 'Access denied. Please sign in to continue.');
+    }
+};
+
+export const admin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        sendError(res, 403, 'Access denied. This action requires administrator privileges.');
     }
 };

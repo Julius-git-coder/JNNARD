@@ -37,19 +37,28 @@ function VerifyContent() {
                 throw new Error(result.message || 'Verification failed');
             }
 
-            // Save tokens if returned (which they are) to local storage or context
+            // Save authentication data
             if (result.accessToken) {
                 localStorage.setItem('accessToken', result.accessToken);
-                localStorage.setItem('user', JSON.stringify({ name: result.name, email: result.email, avatar: result.avatar }));
+                if (result.refreshToken) localStorage.setItem('refreshToken', result.refreshToken);
+                localStorage.setItem('user', JSON.stringify({
+                    name: result.name,
+                    email: result.email,
+                    avatar: result.avatar,
+                    role: result.role,
+                    workerProfile: result.workerProfile
+                }));
             }
 
             if (mode === 'reset') {
-                // For reset flow, we need to pass the OTP to the next step or use a temp token. 
-                // The backend uses the OTP validation in the reset endpoint too, so we just redirect.
-                // Ideally for security, we'd exchange OTP for a reset token, but per current controller design:
                 window.location.href = `/reset-password?email=${encodeURIComponent(email)}&otp=${otp}`;
             } else {
-                window.location.href = '/dashboard';
+                // Redirect based on role
+                if (result.role === 'worker') {
+                    window.location.href = '/worker/dashboard';
+                } else {
+                    window.location.href = '/dashboard';
+                }
             }
 
         } catch (err: any) {

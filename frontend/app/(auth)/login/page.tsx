@@ -38,11 +38,19 @@ export default function LoginPage() {
             localStorage.setItem('user', JSON.stringify({
                 name: result.name,
                 email: result.email,
-                avatar: result.avatar
+                avatar: result.avatar,
+                role: result.role,
+                workerProfile: result.workerProfile
             }));
 
             handleSuccess("Login successful");
-            window.location.href = '/dashboard';
+
+            // Redirect based on role
+            if (result.role === 'worker') {
+                window.location.href = '/worker/dashboard';
+            } else {
+                window.location.href = '/dashboard';
+            }
 
         } catch (err: any) {
             handleError(err, 'Login failed. Please check your credentials and try again.');

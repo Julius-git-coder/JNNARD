@@ -32,6 +32,15 @@ const userSchema = new mongoose.Schema(
         otpExpires: {
             type: Date,
         },
+        role: {
+            type: String,
+            enum: ['admin', 'worker'],
+            default: 'worker',
+        },
+        workerProfile: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Worker',
+        },
     },
     {
         timestamps: true,
