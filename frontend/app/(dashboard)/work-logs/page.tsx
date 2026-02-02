@@ -12,8 +12,11 @@ import { Input } from '@/components/ui/input';
 export default function WorkLogsPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
-    const { workers, isLoading, refreshWorkers } = useWorkers();
+    const { workers, isLoading, refreshWorkers } = useWorkers(true); // Enable auto-refresh
     const [searchQuery, setSearchQuery] = useState('');
+
+    console.log('🏢 WorkLogsPage - Workers count:', workers.length);
+    console.log('🏢 WorkLogsPage - Workers data:', workers);
 
     const handleAdd = () => {
         setEditingWorker(null);
@@ -29,6 +32,9 @@ export default function WorkLogsPage() {
         worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (worker.role && worker.role.toLowerCase().includes(searchQuery.toLowerCase()))
     );
+
+    console.log('🔍 WorkLogsPage - Filtered workers count:', filteredWorkers.length);
+    console.log('🔍 WorkLogsPage - Search query:', searchQuery);
 
     return (
         <div className="space-y-6">

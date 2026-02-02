@@ -44,11 +44,15 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
         e.preventDefault();
         try {
             setIsSubmitting(true);
-            const data = { name, role, status, avatar };
+
+            // When editing, only send status. When creating, send all fields
+            const data = workerToEdit
+                ? { status }  // Only status for editing
+                : { name, role, status, avatar };  // All fields for creating
 
             if (workerToEdit) {
                 await workerApi.update(workerToEdit._id, data);
-                handleSuccess(`${name}'s profile has been updated successfully.`);
+                handleSuccess(`${name}'s availability status has been updated.`);
             } else {
                 await workerApi.create(data);
                 handleSuccess(`${name} has been added to the team.`);
@@ -67,7 +71,7 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{workerToEdit ? 'Edit Team Member' : 'Add New Team Member'}</DialogTitle>
+                    <DialogTitle>{workerToEdit ? 'Update Team Member Status' : 'Add New Team Member'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="space-y-2">
@@ -78,7 +82,12 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
                             required
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            disabled={!!workerToEdit}
+                            className={workerToEdit ? "bg-gray-50 cursor-not-allowed" : ""}
                         />
+                        {workerToEdit && (
+                            <p className="text-xs text-gray-500">Name cannot be changed. Workers manage their own profile details.</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="role">Position / Role</Label>
@@ -88,7 +97,12 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
                             required
                             value={role}
                             onChange={(e) => setRole(e.target.value)}
+                            disabled={!!workerToEdit}
+                            className={workerToEdit ? "bg-gray-50 cursor-not-allowed" : ""}
                         />
+                        {workerToEdit && (
+                            <p className="text-xs text-gray-500">Role cannot be changed. Workers manage their own profile details.</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="avatar">Avatar URL (Optional)</Label>
@@ -97,7 +111,12 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
                             placeholder="https://example.com/avatar.png"
                             value={avatar}
                             onChange={(e) => setAvatar(e.target.value)}
+                            disabled={!!workerToEdit}
+                            className={workerToEdit ? "bg-gray-50 cursor-not-allowed" : ""}
                         />
+                        {workerToEdit && (
+                            <p className="text-xs text-gray-500">Avatar cannot be changed. Workers manage their own profile details.</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="status">Availability</Label>
@@ -111,12 +130,15 @@ export function CreateWorkerDialog({ open, onOpenChange, onSuccess, workerToEdit
                                 <SelectItem value="Inactive">Inactive</SelectItem>
                             </SelectContent>
                         </Select>
+                        {workerToEdit && (
+                            <p className="text-xs text-blue-600">You can update the worker's availability status.</p>
+                        )}
                     </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                         <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
-                            {isSubmitting ? 'Saving...' : workerToEdit ? 'Save Changes' : 'Add Member'}
+                            {isSubmitting ? 'Saving...' : workerToEdit ? 'Update Status' : 'Add Member'}
                         </Button>
                     </DialogFooter>
                 </form>

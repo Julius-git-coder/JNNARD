@@ -69,7 +69,7 @@ export const updateTaskStatus = async (req, res) => {
         }
 
         // Check if the task is assigned to the current worker
-        if (task.assignedTo.toString() !== req.user.workerProfile.toString()) {
+        if (!task.assignedTo || task.assignedTo.toString() !== req.user.workerProfile._id.toString()) {
             return sendError(res, 403, 'You are not authorized to update this task.');
         }
 

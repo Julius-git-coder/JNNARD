@@ -15,7 +15,7 @@ const generateOTP = () => {
 // @access  Public
 export const register = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, jobType } = req.body;
         const file = req.file; // From Multer
 
         const userExists = await User.findOne({ email });
@@ -28,6 +28,7 @@ export const register = async (req, res) => {
         const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
         const userRole = role === 'admin' ? 'admin' : 'worker';
+        const defaultJobType = jobType || (userRole === 'admin' ? 'admin' : 'worker');
 
         const avatarUrl = file ? (file.url || file.path || file.secure_url) : '';
 
@@ -38,7 +39,8 @@ export const register = async (req, res) => {
             avatar: avatarUrl,
             otp,
             otpExpires,
-            role: userRole
+            role: userRole,
+            jobType: defaultJobType
         });
 
         // If worker, create worker profile
@@ -46,7 +48,7 @@ export const register = async (req, res) => {
             const worker = await Worker.create({
                 name,
                 email,
-                role: 'Intern', // Default role label
+                role: user.jobType || 'Intern', // Use jobType for worker profile role
                 avatar: user.avatar,
                 userId: user._id
             });
@@ -62,7 +64,7 @@ export const register = async (req, res) => {
                     type: 'WORKER_SIGNUP',
                     title: 'New Worker Registered',
                     message: `${user.name} has signed up as a worker.`,
-                    link: '/workers' // Assuming there is a workers list page
+                    link: '/workers'
                 });
             }
         }
@@ -85,6 +87,8 @@ export const register = async (req, res) => {
             name: user.name,
             email: user.email,
             avatar: user.avatar,
+            role: user.role,
+            jobType: user.jobType,
             message: 'Registration successful. A verification code has been sent to your email.'
         });
 
@@ -129,6 +133,7 @@ export const verifyEmail = async (req, res) => {
             email: user.email,
             avatar: user.avatar,
             role: user.role,
+            jobType: user.jobType,
             workerProfile: user.workerProfile,
             ...tokens,
             message: 'Your email has been verified successfully.'
@@ -166,7 +171,7 @@ export const login = async (req, res) => {
                     worker = await Worker.create({
                         name: user.name,
                         email: user.email,
-                        role: 'Intern',
+                        role: user.jobType || 'Intern',
                         avatar: user.avatar,
                         userId: user._id
                     });
@@ -185,6 +190,7 @@ export const login = async (req, res) => {
                 email: user.email,
                 avatar: user.avatar,
                 role: user.role,
+                jobType: user.jobType,
                 workerProfile: user.workerProfile,
                 ...tokens
             });
@@ -324,6 +330,10 @@ export const updateProfile = async (req, res) => {
                 user.avatar = req.body.avatar;
             }
 
+            if (req.body.jobType) {
+                user.jobType = req.body.jobType;
+            }
+
             if (req.body.password) {
                 user.password = req.body.password;
             }
@@ -335,7 +345,8 @@ export const updateProfile = async (req, res) => {
                 await Worker.findByIdAndUpdate(updatedUser.workerProfile, {
                     name: updatedUser.name,
                     avatar: updatedUser.avatar,
-                    email: updatedUser.email
+                    email: updatedUser.email,
+                    role: updatedUser.jobType
                 });
             }
 
@@ -345,6 +356,7 @@ export const updateProfile = async (req, res) => {
                 name: updatedUser.name,
                 email: updatedUser.email,
                 avatar: updatedUser.avatar,
+                jobType: updatedUser.jobType,
                 message: 'Your profile has been updated successfully.'
             });
 

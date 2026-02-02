@@ -40,7 +40,7 @@ export function WorkerTable({ workers, onUpdate, onEdit }: WorkerTableProps) {
 
     return (
         <div className="border rounded-lg bg-white dark:bg-gray-950 shadow-sm overflow-hidden">
-            <div className="overflow-auto max-h-[320px]">
+            <div className="overflow-auto max-h-[600px]">
                 <Table className="min-w-[600px] md:min-w-full">
                     <TableHeader className="sticky top-0 bg-white dark:bg-gray-950 z-10 shadow-sm">
                         <TableRow>

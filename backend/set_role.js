@@ -17,6 +17,9 @@ const assignRole = async (email, role, workerName = null) => {
         }
 
         user.role = role;
+        if (!user.jobType) {
+            user.jobType = role;
+        }
 
         if (role === 'worker' && !user.workerProfile) {
             // Create a worker profile if it doesn't exist
@@ -25,13 +28,16 @@ const assignRole = async (email, role, workerName = null) => {
                 worker = await Worker.create({
                     name: workerName || user.name,
                     email: user.email,
-                    role: 'Intern',
+                    role: user.jobType || 'Intern',
                     userId: user._id
                 });
             }
             user.workerProfile = worker._id;
             worker.userId = user._id;
             await worker.save();
+        } else if (user.workerProfile) {
+            // Update existing worker profile role
+            await Worker.findByIdAndUpdate(user.workerProfile, { role: user.jobType });
         }
 
         await user.save();

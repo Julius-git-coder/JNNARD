@@ -34,6 +34,10 @@ export function TeamSection({ isLoading, members }: TeamSectionProps) {
         (member.role && member.role.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
+    console.log('👥 TeamSection - Total members:', members.length);
+    console.log('🔍 Filtered members:', filteredMembers.length);
+    console.log('📋 Members:', members.map(m => `${m.name} (${m.role})`));
+
     if (isLoading) {
         return (
             <div className="space-y-4">

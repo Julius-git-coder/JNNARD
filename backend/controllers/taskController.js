@@ -71,10 +71,31 @@ export const createTask = async (req, res) => {
 
 // @desc    Update a task
 // @route   PUT /api/tasks/:id
-// @access  Admin
+// @access  Admin (Full), Worker (Status only if assigned)
 export const updateTask = async (req, res) => {
     try {
         const { title, description, project, assignedTo, status, priority, dueDate, deliverables } = req.body;
+
+        const task = await Task.findById(req.params.id);
+        if (!task) {
+            return sendError(res, 404, 'The task you are attempting to update was not found.');
+        }
+
+        // Permission check
+        if (req.user.role !== 'admin') {
+            // Check if worker is assigned to this task
+            if (!req.user.workerProfile || !task.assignedTo || task.assignedTo.toString() !== req.user.workerProfile._id.toString()) {
+                return sendError(res, 403, 'Permission denied. You can only update tasks assigned to you.');
+            }
+
+            // Workers can only update 'status'
+            const updateFields = Object.keys(req.body);
+            const forbiddenFields = updateFields.filter(field => field !== 'status');
+
+            if (forbiddenFields.length > 0) {
+                return sendError(res, 403, `Permission denied. Workers can only update task status. Forbidden fields: ${forbiddenFields.join(', ')}`);
+            }
+        }
 
         const updateData = {};
         if (title !== undefined) updateData.title = title;
@@ -86,17 +107,13 @@ export const updateTask = async (req, res) => {
         if (dueDate !== undefined) updateData.dueDate = dueDate || null;
         if (deliverables !== undefined) updateData.deliverables = deliverables;
 
-        const task = await Task.findByIdAndUpdate(
+        const updatedTask = await Task.findByIdAndUpdate(
             req.params.id,
             { $set: updateData },
             { new: true, runValidators: true }
         ).populate('project', 'title').populate('assignedTo', 'name avatar role');
 
-        if (!task) {
-            return sendError(res, 404, 'The task you are attempting to update was not found.');
-        }
-
-        res.json(task);
+        res.json(updatedTask);
     } catch (error) {
         sendError(res, 400, 'Failed to update task details. Please check your input and try again.', error);
     }

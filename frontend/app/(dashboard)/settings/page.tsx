@@ -18,6 +18,7 @@ export default function SettingsPage() {
         name: '',
         email: '',
         password: '',
+        jobType: '',
     });
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export default function SettingsPage() {
             setFormData({
                 name: parsed.name || '',
                 email: parsed.email || '',
+                jobType: parsed.jobType || '',
                 password: '',
             });
             setAvatarPreview(parsed.avatar || null);
@@ -61,6 +63,7 @@ export default function SettingsPage() {
             const data = new FormData();
             data.append('name', formData.name);
             data.append('email', formData.email);
+            data.append('jobType', formData.jobType);
             if (formData.password) data.append('password', formData.password);
 
             if (avatarFile) {
@@ -76,7 +79,8 @@ export default function SettingsPage() {
                 ...storedUser,
                 name: result.name,
                 email: result.email,
-                avatar: result.avatar
+                avatar: result.avatar,
+                jobType: result.jobType
             };
             localStorage.setItem('user', JSON.stringify(updatedUserData));
             setUser(updatedUserData);
@@ -161,6 +165,16 @@ export default function SettingsPage() {
                                         placeholder="name@example.com"
                                     />
                                 </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="jobType">Job Type / Title</Label>
+                                <Input
+                                    id="jobType"
+                                    value={formData.jobType}
+                                    onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
+                                    placeholder="e.g. Developer, Project Manager"
+                                />
                             </div>
 
                             <div className="space-y-2">

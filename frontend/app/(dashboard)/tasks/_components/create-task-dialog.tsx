@@ -135,7 +135,7 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: Create
                                                     <AvatarImage src={w.avatar} />
                                                     <AvatarFallback>{w.name[0]}</AvatarFallback>
                                                 </Avatar>
-                                                {w.name}
+                                                <span>{w.name} <span className="text-xs text-gray-500">({w.role})</span></span>
                                             </div>
                                         </SelectItem>
                                     ))}

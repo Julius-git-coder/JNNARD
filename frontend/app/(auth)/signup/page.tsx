@@ -18,6 +18,7 @@ export default function SignupPage() {
         password: '',
         confirmPassword: '',
         role: 'worker', // Default role
+        jobType: '', // Added jobType
         terms: false
     });
 
@@ -43,6 +44,9 @@ export default function SignupPage() {
             data.append('email', formData.email);
             data.append('password', formData.password);
             data.append('role', formData.role);
+            if (formData.jobType) {
+                data.append('jobType', formData.jobType);
+            }
 
             const response = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
@@ -105,8 +109,8 @@ export default function SignupPage() {
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'worker' })}
                                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${formData.role === 'worker'
-                                            ? 'border-black bg-gray-50 dark:bg-gray-900 dark:border-white shadow-sm'
-                                            : 'border-gray-100 hover:border-gray-200 text-gray-500'
+                                        ? 'border-black bg-gray-50 dark:bg-gray-900 dark:border-white shadow-sm'
+                                        : 'border-gray-100 hover:border-gray-200 text-gray-500'
                                         }`}
                                 >
                                     <span className="font-bold text-sm">Intern / Worker</span>
@@ -116,8 +120,8 @@ export default function SignupPage() {
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'admin' })}
                                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${formData.role === 'admin'
-                                            ? 'border-black bg-gray-50 dark:bg-gray-900 dark:border-white shadow-sm'
-                                            : 'border-gray-100 hover:border-gray-200 text-gray-500'
+                                        ? 'border-black bg-gray-50 dark:bg-gray-900 dark:border-white shadow-sm'
+                                        : 'border-gray-100 hover:border-gray-200 text-gray-500'
                                         }`}
                                 >
                                     <span className="font-bold text-sm">Administrator</span>
@@ -136,6 +140,18 @@ export default function SignupPage() {
                                 required
                                 className="h-11"
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="jobType">Job Type / Title</Label>
+                            <Input
+                                id="jobType"
+                                placeholder={formData.role === 'admin' ? 'e.g. Project Manager, Admin' : 'e.g. Developer, HR'}
+                                value={formData.jobType}
+                                onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
+                                className="h-11"
+                            />
+                            <p className="text-[10px] text-gray-400 italic">Defaults to "{formData.role}" if left blank.</p>
                         </div>
 
                         <div className="space-y-2">

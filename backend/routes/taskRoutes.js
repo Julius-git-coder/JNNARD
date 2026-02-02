@@ -20,7 +20,7 @@ router.route('/project/:projectId')
 
 router.route('/:id')
     .get(getTaskById)
-    .put(protect, admin, updateTask)
+    .put(protect, updateTask)
     .delete(protect, admin, deleteTask);
 
 export default router;

@@ -11,7 +11,7 @@ import { useWorkers } from '@/hooks/useWorkers';
 
 export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
-    const { workers, isLoading: isWorkersLoading } = useWorkers();
+    const { workers, isLoading: isWorkersLoading } = useWorkers(true); // Enable auto-refresh
 
     useEffect(() => {
         const user = localStorage.getItem('user');

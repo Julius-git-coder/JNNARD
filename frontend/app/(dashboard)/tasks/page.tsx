@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
-import { useTasks } from '@/hooks/useTasks';
+import { useTasks, Task } from '@/hooks/useTasks';
 import { TaskTable } from './_components/task-table';
 import { CreateTaskDialog } from './_components/create-task-dialog';
 import { Skeleton } from '@/components/ui/skeleton';

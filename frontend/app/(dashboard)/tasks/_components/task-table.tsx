@@ -18,11 +18,11 @@ import { useState, useEffect } from 'react';
 interface TaskTableProps {
     tasks: Task[];
     onUpdate: () => void;
+    onEdit: (task: Task) => void;
 }
 
-export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
+export function TaskTable({ tasks, onUpdate, onEdit }: TaskTableProps) {
     const [user, setUser] = useState<any>(null);
-    const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -91,7 +91,12 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                                             <AvatarImage src={task.assignedTo?.avatar} />
                                             <AvatarFallback>{task.assignedTo?.name?.[0] || '?'}</AvatarFallback>
                                         </Avatar>
-                                        <span className="text-sm">{task.assignedTo?.name || 'Unassigned'}</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm">{task.assignedTo?.name || 'Unassigned'}</span>
+                                            {task.assignedTo?.role && (
+                                                <span className="text-xs text-gray-500 capitalize">{task.assignedTo.role}</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -125,7 +130,7 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                onClick={() => setEditingTask(task)}
+                                                onClick={() => onEdit(task)}
                                                 tooltip="Edit Task"
                                             >
                                                 <Edit2 className="h-4 w-4" />
@@ -154,16 +159,6 @@ export function TaskTable({ tasks, onUpdate }: TaskTableProps) {
                     </TableBody>
                 </Table>
             </div>
-
-            <CreateTaskDialog
-                open={!!editingTask}
-                onOpenChange={(open) => !open && setEditingTask(null)}
-                onSuccess={() => {
-                    onUpdate();
-                    setEditingTask(null);
-                }}
-                task={editingTask || undefined}
-            />
 
             <ConfirmationDialog
                 open={!!deletingTaskId}

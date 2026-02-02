@@ -12,7 +12,7 @@ export interface Task {
     priority: 'Low' | 'Medium' | 'High';
     dueDate?: string;
     project: { _id: string; title: string };
-    assignedTo?: { _id: string; name: string; avatar?: string };
+    assignedTo?: { _id: string; name: string; avatar?: string; role?: string };
     deliverables?: string;
 }
 

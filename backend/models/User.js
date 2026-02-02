@@ -41,6 +41,10 @@ const userSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Worker',
         },
+        jobType: {
+            type: String,
+            default: '',
+        },
     },
     {
         timestamps: true,

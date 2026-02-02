@@ -12,23 +12,41 @@ export interface Worker {
     status: 'Active' | 'Inactive' | 'Busy';
 }
 
-export function useWorkers() {
+export function useWorkers(autoRefresh: boolean = false) {
     const [workers, setWorkers] = useState<Worker[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchWorkers();
-    }, []);
 
-    const fetchWorkers = async () => {
+        // Auto-refresh every 30 seconds if enabled
+        if (autoRefresh) {
+            const interval = setInterval(() => {
+                fetchWorkers(true); // Silent refresh
+            }, 30000); // 30 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [autoRefresh]);
+
+    const fetchWorkers = async (silent: boolean = false) => {
         try {
-            setIsLoading(true);
+            if (!silent) {
+                setIsLoading(true);
+            }
             const response = await workerApi.getAll();
+            console.log('✅ Workers fetched:', response.data.length, 'workers');
+            console.log('Workers:', response.data.map((w: any) => `${w.name} (${w.role})`));
             setWorkers(response.data);
         } catch (error) {
-            handleError(error, "Failed to load team members.");
+            console.error('❌ Failed to fetch workers:', error);
+            if (!silent) {
+                handleError(error, "Failed to load team members.");
+            }
         } finally {
-            setIsLoading(false);
+            if (!silent) {
+                setIsLoading(false);
+            }
         }
     };
 

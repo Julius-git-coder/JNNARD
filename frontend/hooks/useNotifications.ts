@@ -23,8 +23,12 @@ export function useNotifications() {
             const response = await notificationApi.getAll();
             setNotifications(response.data.notifications);
             setUnreadCount(response.data.unreadCount);
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+        } catch (error: any) {
+            // Silently ignore 401 errors (user not authenticated)
+            // This is expected when session expires
+            if (error?.response?.status !== 401) {
+                console.error('Failed to fetch notifications:', error);
+            }
         } finally {
             setIsLoading(false);
         }
