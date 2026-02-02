@@ -5,9 +5,17 @@ import { useWorkerDashboard } from '@/hooks/useWorkerDashboard';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, User } from 'lucide-react';
+import { TeamMembersDialog } from './_components/team-members-dialog';
 
 export default function WorkerProjectsPage() {
     const { projects, isLoading } = useWorkerDashboard();
+    const [selectedProject, setSelectedProject] = React.useState<any>(null);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
+    const handleOpenDialog = (project: any) => {
+        setSelectedProject(project);
+        setIsDialogOpen(true);
+    };
 
     if (isLoading) {
         return (
@@ -58,7 +66,11 @@ export default function WorkerProjectsPage() {
                                             <span>Team Members</span>
                                             <span>{project.members?.length || 0}</span>
                                         </div>
-                                        <div className="flex -space-x-2 overflow-hidden">
+                                        <div
+                                            className="flex -space-x-2 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => handleOpenDialog(project)}
+                                            title="View all team members"
+                                        >
                                             {project.members?.map((member: any) => (
                                                 <img
                                                     key={member._id}
@@ -79,6 +91,14 @@ export default function WorkerProjectsPage() {
                     </Card>
                 )}
             </div>
+            {selectedProject && (
+                <TeamMembersDialog
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    projectTitle={selectedProject.title}
+                    members={selectedProject.members || []}
+                />
+            )}
         </div>
     );
 }

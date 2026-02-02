@@ -107,6 +107,17 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: Create
                         />
                     </div>
 
+                    <div className="space-y-2">
+                        <Label htmlFor="task-description">Description</Label>
+                        <Textarea
+                            id="task-description"
+                            placeholder="Describe the task details..."
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="h-20"
+                        />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Project</Label>
@@ -114,7 +125,7 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: Create
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select project" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="max-h-[200px]">
                                     {projects.map(p => (
                                         <SelectItem key={p._id} value={p._id}>{p.title}</SelectItem>
                                     ))}
@@ -127,7 +138,7 @@ export function CreateTaskDialog({ open, onOpenChange, onSuccess, task }: Create
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select worker" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="max-h-[200px]">
                                     {workers.map(w => (
                                         <SelectItem key={w._id} value={w._id}>
                                             <div className="flex items-center gap-2">

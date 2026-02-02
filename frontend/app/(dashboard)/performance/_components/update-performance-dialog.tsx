@@ -114,7 +114,7 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess, recordT
                                                     <AvatarImage src={w.avatar} />
                                                     <AvatarFallback>{w.name[0]}</AvatarFallback>
                                                 </Avatar>
-                                                {w.name}
+                                                <span>{w.name} <span className="text-xs text-gray-500">({w.role})</span></span>
                                             </div>
                                         </SelectItem>
                                     ))}

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useWorkerDashboard } from '@/hooks/useWorkerDashboard';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     Select,
@@ -12,7 +12,7 @@ import {
     SelectValue
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Clock, PlayCircle, AlertCircle } from 'lucide-react';
+import { Briefcase, Calendar, CheckCircle2, Clock, PlayCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function WorkerTasksPage() {
@@ -59,34 +59,45 @@ export default function WorkerTasksPage() {
         <div className="space-y-6">
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">My Tasks</h1>
 
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {tasks.length > 0 ? (
                     tasks.map((task: any) => (
-                        <Card key={task._id} className="border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
-                            <div className="flex flex-col md:flex-row md:items-center p-5 gap-4">
-                                <div className="flex-1 space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="font-semibold text-base">{task.title}</h3>
-                                        <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                                            {task.priority}
-                                        </Badge>
+                        <Card key={task._id} className="border-gray-200 dark:border-gray-800 flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
+                            <CardHeader className="pb-3">
+                                <div className="flex justify-between items-start">
+                                    <CardTitle className="text-lg font-bold leading-tight">{task.title}</CardTitle>
+                                    <Badge variant="outline" className={`shrink-0 ml-2 ${getPriorityColor(task.priority)}`}>
+                                        {task.priority}
+                                    </Badge>
+                                </div>
+                                <CardDescription className="line-clamp-2 mt-2 h-10" title={task.description}>
+                                    {task.description || "No description provided."}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1 flex flex-col justify-between pt-0">
+                                <div className="space-y-3 mt-4">
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                        <div className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                            <Briefcase className="h-4 w-4 text-gray-400" />
+                                            {task.project?.title || 'No Project'}
+                                        </div>
                                     </div>
-                                    <p className="text-sm text-gray-500 line-clamp-2">{task.description}</p>
-                                    <div className="flex items-center gap-3 text-xs text-gray-400">
-                                        <span className="font-medium text-blue-600 dark:text-blue-400">{task.project?.title}</span>
-                                        <span>•</span>
-                                        <span>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}</span>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No Due Date'}</span>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 shrink-0">
-                                    <div className="flex flex-col gap-1.5 min-w-[140px]">
-                                        <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Status</label>
+                                <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-semibold uppercase text-gray-500 tracking-wider">Status</span>
+                                        </div>
                                         <Select
                                             value={task.status}
                                             onValueChange={(val) => handleStatusChange(task._id, val)}
                                         >
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-full">
                                                 <div className="flex items-center gap-2">
                                                     {getStatusIcon(task.status)}
                                                     <SelectValue />
@@ -101,12 +112,15 @@ export default function WorkerTasksPage() {
                                         </Select>
                                     </div>
                                 </div>
-                            </div>
+                            </CardContent>
                         </Card>
                     ))
                 ) : (
-                    <Card className="p-12 text-center border-gray-200 dark:border-gray-800">
-                        <p className="text-gray-500">No tasks assigned to you yet.</p>
+                    <Card className="col-span-full border-gray-200 dark:border-gray-800 p-12 text-center">
+                        <div className="flex flex-col items-center justify-center space-y-3">
+                            <Briefcase className="h-12 w-12 text-gray-300" />
+                            <p className="text-gray-500 font-medium">No tasks assigned to you yet.</p>
+                        </div>
                     </Card>
                 )}
             </div>

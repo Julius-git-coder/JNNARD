@@ -94,7 +94,7 @@ export function SelectValue({ placeholder }: { placeholder?: string }) {
     return <span>{context.value || placeholder}</span>;
 }
 
-export function SelectContent({ children }: { children: React.ReactNode }) {
+export function SelectContent({ children, className }: { children: React.ReactNode; className?: string }) {
     const context = React.useContext(SelectContext);
     const [mounted, setMounted] = React.useState(false);
 
@@ -110,6 +110,7 @@ export function SelectContent({ children }: { children: React.ReactNode }) {
         top: context.triggerRect.bottom + 4,
         left: context.triggerRect.left,
         width: context.triggerRect.width,
+        minWidth: 100,
         zIndex: 9999,
     } : {};
 
@@ -118,7 +119,10 @@ export function SelectContent({ children }: { children: React.ReactNode }) {
             <div className="fixed inset-0 z-[9998]" onClick={() => context.setOpen(false)} />
             <div
                 style={style}
-                className="overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-950 shadow-md animate-in fade-in-0 zoom-in-95 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50"
+                className={cn(
+                    "max-h-[300px] overflow-auto rounded-md border border-gray-200 bg-white p-1 text-gray-950 shadow-md animate-in fade-in-0 zoom-in-95 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50",
+                    className
+                )}
             >
                 {children}
             </div>
