@@ -60,6 +60,13 @@ export default function PerformancePage() {
         record.project?.title?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const isEdited = (record: PerformanceRecord) => {
+        if (!record.updatedAt || !record.createdAt) return false;
+        const created = new Date(record.createdAt).getTime();
+        const updated = new Date(record.updatedAt).getTime();
+        return updated - created > 10000;
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -103,52 +110,128 @@ export default function PerformancePage() {
                     <PerformanceChart isLoading={isLoading} />
                 </div>
 
-                <div className="border rounded-lg bg-white dark:bg-gray-950 shadow-sm overflow-hidden">
-                    <div className="overflow-auto max-h-[320px]">
-                        <Table className="min-w-[700px] md:min-w-full relative">
-                            <TableHeader className="sticky top-0 bg-white dark:bg-gray-950 z-10 shadow-sm">
+                {/* MOBILE VIEW (CARDS) */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {filteredRecords.map((record) => (
+                        <div key={record._id} className="bg-white dark:bg-gray-950 p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-10 w-10 border-2 border-white dark:border-gray-800 shadow-sm">
+                                        <AvatarImage src={record.worker?.avatar} alt={record.worker?.name} />
+                                        <AvatarFallback className="bg-blue-100 text-blue-700 font-bold uppercase">{record.worker?.name?.substring(0, 2)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-bold text-gray-900 dark:text-gray-50">{record.worker?.name}</p>
+                                        <p className="text-xs text-gray-400 font-medium">{record.worker?.role}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600" onClick={() => handleEdit(record)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(record._id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-50 dark:border-gray-900">
+                                <div>
+                                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Project</p>
+                                    <p className="text-sm font-medium truncate">{record.project?.title}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Status</p>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant={record.status === 'Off Track' ? 'destructive' : 'secondary'} className="text-[10px] py-0">
+                                            {record.status}
+                                        </Badge>
+                                        {isEdited(record) && (
+                                            <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 text-[9px] py-0 h-4">
+                                                Updated
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Target vs Actual</p>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-bold text-blue-600">{record.actual}%</span>
+                                        <span className="text-xs text-gray-400">/ {record.target}%</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Evaluation Date</p>
+                                    <p className="text-xs text-gray-500">{new Date(record.evaluationDate).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {filteredRecords.length === 0 && !isLoading && (
+                        <div className="p-12 text-center bg-gray-50 dark:bg-gray-900 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800">
+                            <p className="text-gray-500">No performance records found.</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* DESKTOP VIEW (TABLE) */}
+                <div className="hidden md:block border rounded-xl bg-white dark:bg-gray-950 shadow-sm overflow-hidden">
+                    <div className="overflow-auto max-h-[500px]">
+                        <Table className="relative">
+                            <TableHeader className="sticky top-0 bg-white dark:bg-gray-950 z-10 shadow-sm border-b">
                                 <TableRow>
-                                    <TableHead className="bg-inherit">Worker</TableHead>
-                                    <TableHead className="bg-inherit">Project</TableHead>
-                                    <TableHead className="bg-inherit">Target</TableHead>
-                                    <TableHead className="bg-inherit">Actual</TableHead>
-                                    <TableHead className="bg-inherit">Status</TableHead>
-                                    <TableHead className="bg-inherit">Last Updated</TableHead>
-                                    <TableHead className="bg-inherit text-right">Actions</TableHead>
+                                    <TableHead className="bg-inherit font-bold py-4">Worker</TableHead>
+                                    <TableHead className="bg-inherit font-bold">Project</TableHead>
+                                    <TableHead className="bg-inherit font-bold">Target</TableHead>
+                                    <TableHead className="bg-inherit font-bold">Actual</TableHead>
+                                    <TableHead className="bg-inherit font-bold">Status</TableHead>
+                                    <TableHead className="bg-inherit font-bold">Last Updated</TableHead>
+                                    <TableHead className="bg-inherit text-right font-bold pr-6">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {filteredRecords.map((record) => (
-                                    <TableRow key={record._id}>
-                                        <TableCell>
+                                    <TableRow key={record._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors">
+                                        <TableCell className="py-4">
                                             <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8">
+                                                <Avatar className="h-9 w-9 border border-gray-100">
                                                     <AvatarImage src={record.worker?.avatar} alt={record.worker?.name} />
-                                                    <AvatarFallback>{record.worker?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                                    <AvatarFallback className="bg-blue-50 text-blue-600 text-xs font-bold">{record.worker?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
                                                 </Avatar>
-                                                <div>
-                                                    <p className="font-medium">{record.worker?.name}</p>
-                                                    <p className="text-xs text-gray-500">{record.worker?.role}</p>
+                                                <div className="flex flex-col">
+                                                    <p className="font-semibold text-gray-900 dark:text-gray-100">{record.worker?.name}</p>
+                                                    <p className="text-[11px] text-gray-400 leading-tight">{record.worker?.role}</p>
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{record.project?.title}</TableCell>
-                                        <TableCell>{record.target}%</TableCell>
-                                        <TableCell>{record.actual}%</TableCell>
+                                        <TableCell className="font-medium">{record.project?.title}</TableCell>
                                         <TableCell>
-                                            <Badge variant={record.status === 'Off Track' ? 'destructive' : 'secondary'}>
-                                                {record.status}
-                                            </Badge>
+                                            <span className="text-sm text-gray-500">{record.target}%</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="font-bold text-blue-600">{record.actual}%</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col gap-1 items-start">
+                                                <Badge variant={record.status === 'Off Track' ? 'destructive' : 'secondary'} className="rounded-full px-3">
+                                                    {record.status}
+                                                </Badge>
+                                                {isEdited(record) && (
+                                                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 text-[9px] py-0 h-4">
+                                                        Updated
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell className="text-sm text-gray-500">
                                             {new Date(record.evaluationDate).toLocaleDateString()}
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                        <TableCell className="text-right pr-6">
+                                            <div className="flex items-center justify-end gap-1">
                                                 <Button
                                                     variant="ghost"
-                                                    size="sm"
-                                                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                                     onClick={() => handleEdit(record)}
                                                     tooltip="Edit Record"
                                                 >
@@ -156,8 +239,8 @@ export default function PerformancePage() {
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
-                                                    size="sm"
-                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                                                     onClick={() => handleDelete(record._id)}
                                                     tooltip="Delete Record"
                                                 >
@@ -169,8 +252,17 @@ export default function PerformancePage() {
                                 ))}
                                 {filteredRecords.length === 0 && !isLoading && (
                                     <TableRow>
-                                        <TableCell colSpan={7} className="text-center py-10 text-gray-500">
-                                            {searchQuery ? `No results found for "${searchQuery}"` : "No performance records found."}
+                                        <TableCell colSpan={7} className="text-center py-20 bg-gray-50/30">
+                                            <div className="flex flex-col items-center justify-center space-y-2">
+                                                <p className="text-gray-500 font-medium">
+                                                    {searchQuery ? `No results found for "${searchQuery}"` : "No performance records found."}
+                                                </p>
+                                                {searchQuery && (
+                                                    <Button variant="link" size="sm" onClick={() => setSearchQuery('')} className="text-blue-600">
+                                                        Clear search filters
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 )}

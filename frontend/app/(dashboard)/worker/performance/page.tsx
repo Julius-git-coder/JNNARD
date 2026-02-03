@@ -20,6 +20,13 @@ export default function WorkerPerformancePage() {
         }
     };
 
+    const isEdited = (item: any) => {
+        if (!item.updatedAt || !item.createdAt) return false;
+        const created = new Date(item.createdAt).getTime();
+        const updated = new Date(item.updatedAt).getTime();
+        return updated - created > 10000;
+    };
+
     if (isLoading) {
         return (
             <div className="space-y-6">
@@ -68,6 +75,11 @@ export default function WorkerPerformancePage() {
                                             <Badge variant="outline" className={getStatusColor(item.status)}>
                                                 {item.status}
                                             </Badge>
+                                            {isEdited(item) && (
+                                                <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 text-[10px] py-0 h-4">
+                                                    Updated
+                                                </Badge>
+                                            )}
                                         </CardTitle>
                                         <CardDescription>
                                             Project: <span className="font-medium text-gray-900 dark:text-gray-100">{item.project?.title}</span>

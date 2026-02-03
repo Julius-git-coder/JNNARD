@@ -44,6 +44,13 @@ export default function WorkerTasksPage() {
         }
     };
 
+    const isEdited = (task: any) => {
+        if (!task.updatedAt || !task.createdAt) return false;
+        const created = new Date(task.createdAt).getTime();
+        const updated = new Date(task.updatedAt).getTime();
+        return updated - created > 10000; // More than 10 seconds difference for workers to be safe
+    };
+
     if (isLoading) {
         return (
             <div className="space-y-6">
@@ -69,6 +76,11 @@ export default function WorkerTasksPage() {
                                     <Badge variant="outline" className={`shrink-0 ml-2 ${getPriorityColor(task.priority)}`}>
                                         {task.priority}
                                     </Badge>
+                                    {isEdited(task) && (
+                                        <Badge variant="outline" className="shrink-0 ml-2 bg-blue-50 text-blue-600 border-blue-200 text-[10px] py-0 h-4">
+                                            Updated
+                                        </Badge>
+                                    )}
                                 </div>
                                 <CardDescription className="line-clamp-2 mt-2 h-10" title={task.description}>
                                     {task.description || "No description provided."}

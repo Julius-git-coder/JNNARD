@@ -79,6 +79,13 @@ export function TaskTable({ tasks, onUpdate, onEdit }: TaskTableProps) {
         }
     };
 
+    const isEdited = (task: Task) => {
+        if (!task.updatedAt || !task.createdAt) return false;
+        const created = new Date(task.createdAt).getTime();
+        const updated = new Date(task.updatedAt).getTime();
+        return updated - created > 5000; // More than 5 seconds difference
+    };
+
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -93,6 +100,11 @@ export function TaskTable({ tasks, onUpdate, onEdit }: TaskTableProps) {
                                             <Badge variant="outline" className={`shrink-0 ${getPriorityColor(task.priority)}`}>
                                                 {task.priority}
                                             </Badge>
+                                            {isEdited(task) && (
+                                                <Badge variant="outline" className="shrink-0 bg-blue-50 text-blue-600 border-blue-200 text-[10px] py-0 h-4">
+                                                    Updated
+                                                </Badge>
+                                            )}
                                         </div>
                                     </div>
                                     {isAdmin && (

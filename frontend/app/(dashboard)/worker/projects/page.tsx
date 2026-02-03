@@ -17,6 +17,13 @@ export default function WorkerProjectsPage() {
         setIsDialogOpen(true);
     };
 
+    const isEdited = (item: any) => {
+        if (!item.updatedAt || !item.createdAt) return false;
+        const created = new Date(item.createdAt).getTime();
+        const updated = new Date(item.updatedAt).getTime();
+        return updated - created > 10000;
+    };
+
     if (isLoading) {
         return (
             <div className="space-y-6">
@@ -40,8 +47,15 @@ export default function WorkerProjectsPage() {
                                 <div className="flex justify-between items-start">
                                     <div className="space-y-1">
                                         <CardTitle className="text-lg">{project.title}</CardTitle>
-                                        <div className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                            {project.status}
+                                        <div className="flex items-center gap-2">
+                                            <div className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                {project.status}
+                                            </div>
+                                            {isEdited(project) && (
+                                                <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-200 uppercase tracking-tight">
+                                                    Updated
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

@@ -15,6 +15,8 @@ export interface PerformanceRecord {
     status: 'On Track' | 'Off Track' | 'Exceeded' | 'Needs Improvement';
     notes?: string;
     evaluationDate: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export function usePerformance() {

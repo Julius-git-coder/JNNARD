@@ -38,6 +38,13 @@ export function WorkerTable({ workers, onUpdate, onEdit }: WorkerTableProps) {
         }
     };
 
+    const isEdited = (worker: Worker) => {
+        if (!worker.updatedAt || !worker.createdAt) return false;
+        const created = new Date(worker.createdAt).getTime();
+        const updated = new Date(worker.updatedAt).getTime();
+        return updated - created > 10000;
+    };
+
     return (
         <div className="border rounded-lg bg-white dark:bg-gray-950 shadow-sm overflow-hidden">
             <div className="overflow-auto max-h-[600px]">
@@ -71,9 +78,16 @@ export function WorkerTable({ workers, onUpdate, onEdit }: WorkerTableProps) {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant={worker.status === 'Active' ? 'default' : worker.status === 'Busy' ? 'secondary' : 'outline'}>
-                                        {worker.status}
-                                    </Badge>
+                                    <div className="flex flex-col gap-1">
+                                        <Badge variant={worker.status === 'Active' ? 'default' : worker.status === 'Busy' ? 'secondary' : 'outline'}>
+                                            {worker.status}
+                                        </Badge>
+                                        {isEdited(worker) && (
+                                            <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 text-[10px] py-0 h-4 w-fit">
+                                                Updated
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2">

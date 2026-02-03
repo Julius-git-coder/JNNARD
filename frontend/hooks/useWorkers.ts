@@ -10,6 +10,8 @@ export interface Worker {
     role: string;
     avatar?: string;
     status: 'Active' | 'Inactive' | 'Busy';
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export function useWorkers(autoRefresh: boolean = false) {

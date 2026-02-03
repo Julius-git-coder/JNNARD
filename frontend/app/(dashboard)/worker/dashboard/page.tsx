@@ -9,6 +9,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function WorkerDashboardPage() {
     const { projects, tasks, performance, isLoading } = useWorkerDashboard();
 
+    const isEdited = (item: any) => {
+        if (!item.updatedAt || !item.createdAt) return false;
+        const created = new Date(item.createdAt).getTime();
+        const updated = new Date(item.updatedAt).getTime();
+        return updated - created > 10000;
+    };
+
     React.useEffect(() => {
         const user = localStorage.getItem('user');
         if (user) {
@@ -73,8 +80,13 @@ export default function WorkerDashboardPage() {
                                             <p className="font-medium text-sm">{project.title}</p>
                                             <p className="text-xs text-gray-500 line-clamp-1">{project.description}</p>
                                         </div>
-                                        <div className="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                            {project.status}
+                                        <div className="flex flex-col items-end gap-1">
+                                            <div className="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                                {project.status}
+                                            </div>
+                                            {isEdited(project) && (
+                                                <span className="text-[9px] font-bold text-blue-600 uppercase">Updated</span>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -105,6 +117,9 @@ export default function WorkerDashboardPage() {
                                             <p className={`text-[10px] font-bold uppercase ${task.priority === 'High' ? 'text-red-500' : 'text-gray-400'}`}>
                                                 {task.priority}
                                             </p>
+                                            {isEdited(task) && (
+                                                <p className="text-[9px] font-bold text-blue-600 uppercase">Updated</p>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

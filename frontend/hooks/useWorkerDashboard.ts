@@ -7,6 +7,8 @@ interface Project {
     title: string;
     description: string;
     status: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 interface Task {
@@ -15,9 +17,12 @@ interface Task {
     status: string;
     dueDate?: string;
     priority: string;
+    description?: string;
     project?: {
         title: string;
     };
+    createdAt: string;
+    updatedAt: string;
 }
 
 export function useWorkerDashboard() {

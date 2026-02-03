@@ -69,6 +69,8 @@ export default function ProjectsPage() {
                                 issues={project.issues}
                                 members={project.members}
                                 attachments={project.attachments}
+                                createdAt={project.createdAt}
+                                updatedAt={project.updatedAt}
                                 onUpdate={refreshProjects}
                             />
                         ))}

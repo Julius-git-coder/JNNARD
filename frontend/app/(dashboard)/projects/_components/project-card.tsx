@@ -29,6 +29,8 @@ interface ProjectCardProps {
     attachments?: any[];
     issues?: any[];
     onUpdate?: () => void;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export const ProjectCard = ({
@@ -41,6 +43,8 @@ export const ProjectCard = ({
     attachments = [],
     issues = [],
     onUpdate = () => { },
+    createdAt,
+    updatedAt,
 }: ProjectCardProps) => {
     const [isManageOpen, setIsManageOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -79,6 +83,8 @@ export const ProjectCard = ({
                 status === 'Offtrack' ? 'destructive' :
                     'secondary';
 
+    const isEdited = updatedAt && createdAt && (new Date(updatedAt).getTime() - new Date(createdAt).getTime() > 10000);
+
     return (
         <Card className="hover:shadow-md transition-shadow dark:bg-gray-900 border-none shadow-sm h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -86,6 +92,11 @@ export const ProjectCard = ({
                     <Badge variant={statusVariant} className="rounded-full px-3">
                         {status}
                     </Badge>
+                    {isEdited && (
+                        <Badge variant="outline" className="rounded-full px-3 bg-blue-50 text-blue-600 border-blue-200 text-[10px]">
+                            Updated
+                        </Badge>
+                    )}
                 </div>
                 <div className="flex items-center gap-1">
                     {isAdmin && (

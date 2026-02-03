@@ -14,6 +14,8 @@ export interface Project {
     issues?: any[]; // Adjust type as needed
     members: { _id: string; name: string; avatar: string }[];
     attachments?: { name: string; url: string; fileType: string }[];
+    createdAt: string;
+    updatedAt: string;
 }
 
 export function useProjects() {
