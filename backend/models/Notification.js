@@ -14,7 +14,7 @@ const notificationSchema = new mongoose.Schema(
         type: {
             type: String,
             required: true,
-            enum: ['WORKER_SIGNUP', 'TASK_ASSIGNED', 'REPORT_SUBMITTED', 'GENERAL'],
+            enum: ['WORKER_SIGNUP', 'TASK_ASSIGNED', 'REPORT_SUBMITTED', 'REPORT_ACKNOWLEDGED', 'GENERAL'],
         },
         title: {
             type: String,

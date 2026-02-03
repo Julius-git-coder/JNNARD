@@ -39,6 +39,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         { name: 'Project', href: '/projects', icon: Folder },
         { name: 'Tasks', href: '/tasks', icon: CheckSquare },
         { name: 'Team', href: '/work-logs', icon: FileText },
+        { name: 'Reports', href: '/reports', icon: FileText },
         { name: 'Performance', href: '/performance', icon: BarChart2 },
     ];
 
@@ -46,7 +47,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         { name: 'Dashboard', href: '/worker/dashboard', icon: LayoutDashboard },
         { name: 'My Projects', href: '/worker/projects', icon: Folder },
         { name: 'My Tasks', href: '/worker/tasks', icon: CheckSquare },
-        { name: 'Weekly Reports', href: '/worker/reports', icon: FileText },
+        { name: 'Reports', href: '/worker/reports', icon: FileText },
         { name: 'My Performance', href: '/worker/performance', icon: BarChart2 },
     ];
 

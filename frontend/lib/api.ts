@@ -62,6 +62,15 @@ export const workerDashboardApi = {
     getPerformance: () => api.get('/worker-dashboard/performance'),
 };
 
+export const reportApi = {
+    getAll: () => api.get('/reports'),
+    getMyReports: () => api.get('/reports/my-reports'),
+    create: (data: any) => api.post('/reports', data),
+    update: (id: string, data: any) => api.put(`/reports/${id}`, data),
+    delete: (id: string) => api.delete(`/reports/${id}`),
+    acknowledge: (id: string) => api.put(`/reports/${id}/acknowledge`),
+};
+
 export const uploadApi = {
     uploadFile: (file: File) => {
         const formData = new FormData();

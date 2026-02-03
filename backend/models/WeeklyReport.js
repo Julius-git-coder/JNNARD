@@ -7,6 +7,11 @@ const weeklyReportSchema = new mongoose.Schema(
             ref: 'Worker',
             required: true,
         },
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
         task: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Task',
@@ -15,14 +20,6 @@ const weeklyReportSchema = new mongoose.Schema(
         project: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Project',
-            required: true,
-        },
-        weekStartDate: {
-            type: Date,
-            required: true,
-        },
-        weekEndDate: {
-            type: Date,
             required: true,
         },
         summary: {
@@ -34,7 +31,7 @@ const weeklyReportSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['Submitted', 'Reviewed'],
+            enum: ['Submitted', 'Reviewed', 'Acknowledged'],
             default: 'Submitted',
         },
         feedback: {
