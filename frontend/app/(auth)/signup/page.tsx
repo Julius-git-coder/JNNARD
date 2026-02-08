@@ -48,7 +48,8 @@ export default function SignupPage() {
                 data.append('jobType', formData.jobType);
             }
 
-            const response = await fetch('http://localhost:5000/api/auth/register', {
+            const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${BASE_URL}/auth/register`, {
                 method: 'POST',
                 // Fetch automatically sets the correct Content-Type for FormData
                 body: data,
