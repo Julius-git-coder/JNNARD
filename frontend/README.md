@@ -40,6 +40,5 @@ The code for each page is located inside `frontend/app/`.
  **To change the colors:**
    Go to `frontend/app/globals.css`.
 
-   
+   killing the terminal
 kill -9 $(lsof -ti :3000)
-yhh
