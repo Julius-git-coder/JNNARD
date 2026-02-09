@@ -15,10 +15,16 @@ const generateOTP = () => {
 // @access  Public
 export const register = async (req, res) => {
     try {
+        console.log('--- SIGNUP ATTEMPT START ---');
         const { name, email, password, role, jobType } = req.body;
-        const file = req.file; // From Multer
+        console.log('Request Body:', { name, email, role, jobType });
 
+        const file = req.file; // From Multer
+        console.log('File presence:', !!file);
+
+        console.log('Checking if user exists...');
         const userExists = await User.findOne({ email });
+        console.log('User check complete. Exists:', !!userExists);
 
         if (userExists) {
             return sendError(res, 400, 'An account with this email address already exists. Please try logging in instead.');
@@ -32,6 +38,7 @@ export const register = async (req, res) => {
 
         const avatarUrl = file ? (file.url || file.path || file.secure_url) : '';
 
+        console.log('Creating User in DB...');
         let user = await User.create({
             name,
             email,
@@ -42,6 +49,7 @@ export const register = async (req, res) => {
             role: userRole,
             jobType: defaultJobType
         });
+        console.log('User created successfully. ID:', user._id);
 
         // If worker, create worker profile
         if (userRole === 'worker') {
