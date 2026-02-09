@@ -1,25 +1,24 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
 
-async function check() {
+async function clearData() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
-        console.log(`Connected to DB: ${mongoose.connection.name}`);
-
         const db = mongoose.connection.db;
-        const collections = await db.listCollections().toArray();
-        console.log('Collections:', collections.map(c => c.name));
+        console.log(`Connected to: ${mongoose.connection.name}`);
 
+        const collections = await db.listCollections().toArray();
         for (const col of collections) {
-            const count = await db.collection(col.name).countDocuments();
-            console.log(` - ${col.name}: ${count} docs`);
+            const result = await db.collection(col.name).deleteMany({});
+            console.log(` - Cleared ${result.deletedCount} documents from ${col.name}`);
         }
 
+        console.log('Database cleanup successful.');
         process.exit(0);
     } catch (err) {
-        console.error(err);
+        console.error('Cleanup failed:', err);
         process.exit(1);
     }
 }
 
-check();
+clearData();
