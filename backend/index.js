@@ -53,13 +53,20 @@ app.use((err, req, res, next) => {
 
 // Database Connection
 const dbURI = process.env.MONGODB_URI || process.env.MONGO_URI;
-console.log('Attempting to connect to MongoDB...');
-mongoose.connect(dbURI)
-  .then(() => console.log('Successfully connected to MongoDB Atlas'))
-  .catch(err => {
-    console.error('CRITICAL: MongoDB connection error:', err.message);
-    console.error('Full connection error:', err);
-  });
+
+if (!dbURI) {
+  console.error('CRITICAL: No MongoDB URI found! Please check MONGODB_URI or MONGO_URI in environment variables.');
+} else {
+  const sanitizedURI = dbURI.replace(/:([^@]+)@/, ':****@');
+  console.log(`Attempting to connect to MongoDB using ${process.env.MONGODB_URI ? 'MONGODB_URI' : 'MONGO_URI'}...`);
+  console.log(`URI Scheme check: "${dbURI.substring(0, 10)}..."`);
+
+  mongoose.connect(dbURI)
+    .then(() => console.log('Successfully connected to MongoDB Atlas'))
+    .catch(err => {
+      console.error('CRITICAL: MongoDB connection error:', err.message);
+    });
+}
 
 mongoose.connection.on('connected', () => console.log('Mongoose default connection open'));
 mongoose.connection.on('error', (err) => console.log('Mongoose default connection error: ' + err));
