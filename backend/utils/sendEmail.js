@@ -1,14 +1,22 @@
 import nodemailer from 'nodemailer';
 
 const sendEmail = async (options) => {
+    const isSecure = process.env.EMAIL_SECURE === 'true' || process.env.EMAIL_PORT == 465;
+
+    console.log(`Initialising email transport: ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT} (Secure: ${isSecure})`);
+
     const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
+        port: Number(process.env.EMAIL_PORT),
+        secure: isSecure,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD,
         },
+        // Add timeout settings
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
     });
 
     const message = {
