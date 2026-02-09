@@ -6,25 +6,19 @@ const sendEmail = async (options) => {
     console.log(`Initialising email transport: ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT} (Secure: ${isSecure})`);
 
     const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: Number(process.env.EMAIL_PORT),
-        secure: isSecure,
+        service: 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD,
         },
-        // Add timeout settings
-        connectionTimeout: 10000, // 10 seconds
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
     });
 
     const message = {
-        from: `${process.env.EMAIL_FROM} <${process.env.EMAIL_FROM}>`,
+        from: `JNARD System <${process.env.EMAIL_USER}>`,
         to: options.email,
         subject: options.subject,
         text: options.message,
-        html: options.html, // Optional HTML body
+        html: options.html,
     };
 
     try {
