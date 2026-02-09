@@ -93,7 +93,8 @@ export const register = async (req, res) => {
         });
 
     } catch (error) {
-        sendError(res, 500, null, error);
+        console.error('Register Error:', error);
+        sendError(res, 500, 'Registration failed. Please try again.', error);
     }
 };
 

@@ -52,9 +52,18 @@ app.use((err, req, res, next) => {
 });
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch(err => console.error('MongoDB connection error:', err));
+const dbURI = process.env.MONGODB_URI || process.env.MONGO_URI;
+console.log('Attempting to connect to MongoDB...');
+mongoose.connect(dbURI)
+  .then(() => console.log('Successfully connected to MongoDB Atlas'))
+  .catch(err => {
+    console.error('CRITICAL: MongoDB connection error:', err.message);
+    console.error('Full connection error:', err);
+  });
+
+mongoose.connection.on('connected', () => console.log('Mongoose default connection open'));
+mongoose.connection.on('error', (err) => console.log('Mongoose default connection error: ' + err));
+mongoose.connection.on('disconnected', () => console.log('Mongoose default connection disconnected'));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} (ES Modules)`);
