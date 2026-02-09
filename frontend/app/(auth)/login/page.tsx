@@ -19,6 +19,9 @@ export default function LoginPage() {
         e.preventDefault();
         setIsLoading(true);
 
+        // DEBUG: Check environment variable in production
+        console.log('Current Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
+
         try {
             const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api';
             const response = await fetch(`${BASE_URL}/auth/login`, {
