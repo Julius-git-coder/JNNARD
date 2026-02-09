@@ -1,10 +1,10 @@
 import nodemailer from 'nodemailer';
 
 const sendEmail = async (options) => {
-    console.log(`Initialising email transport with explicit settings: smtp.gmail.com:587 (Secure: false)`);
+    console.log(`Initialising email transport: ${process.env.EMAIL_HOST}:587 (Secure: false)`);
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
+        host: process.env.EMAIL_HOST,
         port: 587,
         secure: false, // Use STARTTLS
         auth: {
@@ -13,7 +13,7 @@ const sendEmail = async (options) => {
         },
         logger: true, // Log SMTP traffic to console
         debug: true,  // Include debug output
-        connectionTimeout: 20000, // 20 seconds
+        connectionTimeout: 25000, // 25 seconds
     });
 
     const message = {
