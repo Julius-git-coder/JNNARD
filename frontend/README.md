@@ -1,5 +1,8 @@
 # JNARD Code Guide
 
+> [!IMPORTANT]
+> Muted email logic for now - reminder for next time
+
 This guide helps you find the code for each screen in the application. We have organized the folders to match the website's pages.
 
 ## 📂 Folder Structure
