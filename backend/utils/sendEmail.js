@@ -2,6 +2,12 @@ import nodemailer from 'nodemailer';
 
 const sendEmail = async (options) => {
     try {
+        console.log('--- SEND EMAIL DEBUG ---');
+        console.log(`Host: ${process.env.EMAIL_HOST}`);
+        console.log(`Port: ${process.env.EMAIL_PORT} (parsed: ${parseInt(process.env.EMAIL_PORT)})`);
+        console.log(`Secure: ${process.env.EMAIL_SECURE} (evaluated: ${process.env.EMAIL_SECURE === 'true'})`);
+        console.log(`User: ${process.env.EMAIL_USER}`);
+
         // Create transporter
         const transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
