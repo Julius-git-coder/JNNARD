@@ -47,7 +47,8 @@ export const register = async (req, res) => {
             otp,
             otpExpires,
             role: userRole,
-            jobType: defaultJobType
+            jobType: defaultJobType,
+            isVerified: true // Muted email logic for now - user is verified by default
         });
         console.log('User created successfully. ID:', user._id);
 
@@ -78,16 +79,19 @@ export const register = async (req, res) => {
         }
 
         // Send OTP Email
-        const message = `Your verification code is: ${otp}`;
-        try {
-            await sendEmail({
-                email: user.email,
-                subject: 'JNARD Email Verification',
-                message,
-            });
-        } catch (error) {
-            console.error("Email send failed", error);
-        }
+        // const message = `Your verification code is: ${otp}`;
+        // try {
+        //     await sendEmail({
+        //         email: user.email,
+        //         subject: 'JNARD Email Verification',
+        //         message,
+        //     });
+        // } catch (error) {
+        //     console.error("Email send failed", error);
+        // }
+
+        // Muted email logic for now - reminder for next time
+        const tokens = generateTokens(user._id);
 
         res.status(201).json({
             success: true,
@@ -97,7 +101,8 @@ export const register = async (req, res) => {
             avatar: user.avatar,
             role: user.role,
             jobType: user.jobType,
-            message: 'Registration successful. A verification code has been sent to your email.'
+            ...tokens,
+            message: 'Registration successful.'
         });
 
     } catch (error) {
@@ -164,9 +169,10 @@ export const login = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
-            if (!user.isVerified) {
-                return sendError(res, 401, 'Please verify your email address before logging in.');
-            }
+            // Muted email logic for now - reminder for next time
+            // if (!user.isVerified) {
+            //     return sendError(res, 401, 'Please verify your email address before logging in.');
+            // }
 
             const tokens = generateTokens(user._id);
 

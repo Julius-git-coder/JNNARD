@@ -25,6 +25,8 @@ The code for each page is located inside `frontend/app/`.
 - **Folder**: `frontend/app/(dashboard)/tasks/`
 - **Create Task**: `new/page.tsx` (The form to create a task)
 
+a1f35e001@smtp-brevo.com
+
 #### 🔐 **Login Page**
 - **Folder**: `frontend/app/(auth)/login/`
 - **Main Page**: `page.tsx`

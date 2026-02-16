@@ -61,9 +61,27 @@ export default function SignupPage() {
                 throw new Error(result.message || 'Signup failed');
             }
 
-            handleSuccess("Signup successful! Please verify your email.");
-            // Redirect to verify with email param
-            window.location.href = '/verify?email=' + encodeURIComponent(formData.email);
+            handleSuccess("Signup successful!");
+
+            // Save authentication data
+            if (result.accessToken) {
+                localStorage.setItem('accessToken', result.accessToken);
+                if (result.refreshToken) localStorage.setItem('refreshToken', result.refreshToken);
+                localStorage.setItem('user', JSON.stringify({
+                    name: result.name,
+                    email: result.email,
+                    avatar: result.avatar,
+                    role: result.role,
+                    workerProfile: result.workerProfile
+                }));
+            }
+
+            // Redirect directly based on role
+            if (result.role === 'worker') {
+                window.location.href = '/worker/dashboard';
+            } else {
+                window.location.href = '/dashboard';
+            }
 
         } catch (err: any) {
             handleError(err, 'Signup failed. Please try again.');
