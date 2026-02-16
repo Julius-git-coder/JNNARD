@@ -251,7 +251,8 @@ export const forgotPassword = async (req, res) => {
         });
     } catch (error) {
         console.error('Forgot Password ERROR Cluster:', error);
-        sendError(res, 500, 'Internal Server Error during password reset', error);
+        // Temporarily send the actual message to the frontend for debugging
+        sendError(res, 500, `Production Error: ${error.message || 'Unknown'}`, error);
     }
 };
 
