@@ -1,4 +1,26 @@
 import 'dotenv/config';
+
+// --- DIAGNOSTIC INFO (Must be at the top) ---
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log('--- RENDER DEPLOY DIAGNOSTIC ---');
+console.log('Current Working Directory:', process.cwd());
+console.log('__dirname:', __dirname);
+const utilsPath = path.join(__dirname, 'utils');
+if (fs.existsSync(utilsPath)) {
+  console.log('✅ Utils folder found at:', utilsPath);
+  console.log('Files in utils:', fs.readdirSync(utilsPath));
+} else {
+  console.log('❌ CRITICAL: Utils folder NOT found at:', utilsPath);
+  console.log('Files in current dir:', fs.readdirSync(__dirname));
+}
+console.log('-------------------------------');
+// --------------------------------------------
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -25,25 +47,6 @@ app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
-
-// Diagnostic check for file system issues
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-console.log('--- DIAGNOSTIC INFO ---');
-console.log('Current Dir:', __dirname);
-const utilsPath = path.join(__dirname, 'utils');
-if (fs.existsSync(utilsPath)) {
-  console.log('Utils folder found at:', utilsPath);
-  console.log('Files in utils:', fs.readdirSync(utilsPath));
-} else {
-  console.log('CRITICAL: Utils folder NOT found at:', utilsPath);
-}
-console.log('-----------------------');
 
 // Routes
 app.use('/api/auth', authRoutes);
