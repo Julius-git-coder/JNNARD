@@ -216,12 +216,16 @@ export const login = async (req, res) => {
 // @access  Public
 export const forgotPassword = async (req, res) => {
     try {
+        console.log('--- FORGOT PASSWORD ATTEMPT ---');
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        console.log('Target Email:', email);
 
+        const user = await User.findOne({ email });
         if (!user) {
+            console.log('User not found for:', email);
             return sendError(res, 404, 'No account was found with that email address.');
         }
+        console.log('User found:', user._id);
 
         const otp = generateOTP();
         const otpExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
@@ -229,21 +233,25 @@ export const forgotPassword = async (req, res) => {
         user.otp = otp;
         user.otpExpires = otpExpires;
         await user.save();
+        console.log('OTP generated and saved to DB');
 
         const message = `Your password reset code is: ${otp}`;
 
+        console.log('Attempting to send email via sendEmail utility...');
         await sendEmail({
             email: user.email,
             subject: 'JNARD Password Reset Code',
             message,
         });
+        console.log('Email sent successfully to:', user.email);
 
         res.status(200).json({
             success: true,
             message: 'A password reset code has been sent to your email.'
         });
     } catch (error) {
-        sendError(res, 500, null, error);
+        console.error('Forgot Password ERROR Cluster:', error);
+        sendError(res, 500, 'Internal Server Error during password reset', error);
     }
 };
 
