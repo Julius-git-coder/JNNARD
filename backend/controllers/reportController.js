@@ -9,11 +9,10 @@ import sendError from '../utils/errorResponse.js';
 export const createAdminReport = async (req, res) => {
     try {
         const { workerId, taskId, projectId, summary, deliverableUrl } = req.body;
-        console.log('Report Submission Request:', { workerId, taskId, projectId, summary, deliverableUrl });
-        console.log('Author ID:', req.user._id);
+
 
         if (!workerId || !taskId || !projectId || !summary) {
-            console.log('Validation failed: missing fields');
+
             return sendError(res, 400, 'Please provide all required fields for the report.');
         }
 
@@ -29,7 +28,7 @@ export const createAdminReport = async (req, res) => {
         // Notify worker about the new report
         const workerObj = await Worker.findById(workerId);
         if (workerObj && workerObj.userId) {
-            console.log(`Sending notification to worker user: ${workerObj.userId}`);
+
             await createNotification({
                 recipient: workerObj.userId,
                 sender: req.user._id,

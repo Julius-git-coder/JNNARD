@@ -1,6 +1,7 @@
 import Worker from '../models/Worker.js';
 import User from '../models/User.js';
 import sendError from '../utils/errorResponse.js';
+import { logAction } from '../utils/logger.js';
 
 // @desc    Get all workers
 // @route   GET /api/workers
@@ -65,6 +66,7 @@ export const createWorker = async (req, res) => {
             }
         }
 
+        await logAction({ user: req.user?._id, action: 'CREATE_WORKER', resource: 'WORKER', resourceId: worker._id, status: 'success' });
         res.status(201).json(worker);
     } catch (error) {
         sendError(res, 400, 'Failed to create worker. Please ensure all required fields are provided correctly.', error);
@@ -86,6 +88,7 @@ export const updateWorker = async (req, res) => {
             worker.status = req.body.status || worker.status;
 
             const updatedWorker = await worker.save();
+            await logAction({ user: req.user?._id, action: 'UPDATE_WORKER', resource: 'WORKER', resourceId: req.params.id, status: 'success' });
             res.json(updatedWorker);
         } else {
             sendError(res, 404, 'The worker profile you are trying to update was not found.');
@@ -104,6 +107,7 @@ export const deleteWorker = async (req, res) => {
 
         if (worker) {
             await worker.deleteOne();
+            await logAction({ user: req.user?._id, action: 'DELETE_WORKER', resource: 'WORKER', resourceId: req.params.id, status: 'success' });
             res.json({ success: true, message: 'The worker has been successfully removed.' });
         } else {
             sendError(res, 404, 'The worker you are trying to remove was not found.');

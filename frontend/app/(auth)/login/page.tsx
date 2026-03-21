@@ -28,6 +28,7 @@ export default function LoginPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
+                credentials: 'include', // Ensure cookies are handled
             });
 
             const result = await response.json();
@@ -36,9 +37,7 @@ export default function LoginPage() {
                 throw new Error(result.message || 'Login failed');
             }
 
-            // Save authentication data
-            localStorage.setItem('accessToken', result.accessToken);
-            if (result.refreshToken) localStorage.setItem('refreshToken', result.refreshToken);
+            // Save non-sensitive user info for UI state
             localStorage.setItem('user', JSON.stringify({
                 name: result.name,
                 email: result.email,

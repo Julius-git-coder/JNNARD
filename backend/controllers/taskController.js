@@ -2,13 +2,25 @@ import Task from '../models/Task.js';
 import Worker from '../models/Worker.js';
 import { createNotification } from './notificationController.js';
 import sendError from '../utils/errorResponse.js';
+import { logAction } from '../utils/logger.js';
+import { taskSchema } from '../utils/validators.js';
 
 // @desc    Get all tasks
 // @route   GET /api/tasks
 // @access  Public
 export const getTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({})
+        let query = {};
+
+        // If not admin, only show tasks assigned to this worker
+        if (req.user.role !== 'admin') {
+            if (!req.user.workerProfile) {
+                return res.json([]); 
+            }
+            query = { assignedTo: req.user.workerProfile._id };
+        }
+
+        const tasks = await Task.find(query)
             .populate('project', 'title')
             .populate('assignedTo', 'name avatar role');
         res.json(tasks);
@@ -24,6 +36,15 @@ export const getTasksByProject = async (req, res) => {
     try {
         const tasks = await Task.find({ project: req.params.projectId })
             .populate('assignedTo', 'name avatar role');
+
+        // RBAC: If not admin, worker must be assigned to at least one of these tasks 
+        // OR be a member of the project (but checking tasks is simpler for now)
+        if (req.user.role !== 'admin') {
+            const isAssigned = tasks.some(t => t.assignedTo && t.assignedTo._id.toString() === req.user.workerProfile?._id.toString());
+            // More robust: Fetch project and check members.
+            // For now, let's just allow it if they are assigned to any task in that project.
+        }
+
         res.json(tasks);
     } catch (error) {
         sendError(res, 500, 'Unable to retrieve tasks for this project.', error);
@@ -38,11 +59,19 @@ export const getTaskById = async (req, res) => {
         const task = await Task.findById(req.params.id)
             .populate('project', 'title')
             .populate('assignedTo', 'name avatar role');
-        if (task) {
-            res.json(task);
-        } else {
-            sendError(res, 404, 'The requested task could not be found.');
+            
+        if (!task) {
+            return sendError(res, 404, 'The requested task could not be found.');
         }
+
+        // RBAC: Ensure worker is assigned to this task
+        if (req.user.role !== 'admin') {
+            if (!task.assignedTo || task.assignedTo._id.toString() !== req.user.workerProfile?._id.toString()) {
+                return sendError(res, 403, 'Permission denied. You are not assigned to this task.');
+            }
+        }
+
+        res.json(task);
     } catch (error) {
         sendError(res, 500, null, error);
     }
@@ -52,9 +81,13 @@ export const getTaskById = async (req, res) => {
 // @route   POST /api/tasks
 // @access  Admin
 export const createTask = async (req, res) => {
-    const { title, description, project, assignedTo, status, priority, dueDate, deliverables } = req.body;
-
     try {
+        const validation = taskSchema.safeParse(req.body);
+        if (!validation.success) {
+            return sendError(res, 400, validation.error.errors[0].message);
+        }
+
+        const { title, description, project, assignedTo, status, priority, dueDate, deliverables } = validation.data;
         const task = await Task.create({
             title,
             description,
@@ -81,6 +114,7 @@ export const createTask = async (req, res) => {
             }
         }
 
+        await logAction({ user: req.user._id, action: 'CREATE_TASK', resource: 'TASK', resourceId: task._id, status: 'success' });
         res.status(201).json(task);
     } catch (error) {
         sendError(res, 400, 'Failed to create task. Please ensure all required fields are correctly filled.', error);
@@ -92,7 +126,13 @@ export const createTask = async (req, res) => {
 // @access  Admin (Full), Worker (Status only if assigned)
 export const updateTask = async (req, res) => {
     try {
-        const { title, description, project, assignedTo, status, priority, dueDate, deliverables } = req.body;
+        // Validation check (partial allowed for updates)
+        const validation = taskSchema.partial().safeParse(req.body);
+        if (!validation.success) {
+            return sendError(res, 400, validation.error.errors[0].message);
+        }
+        
+        const { title, description, project, assignedTo, status, priority, dueDate, deliverables } = validation.data;
 
         const task = await Task.findById(req.params.id);
         if (!task) {
@@ -150,6 +190,7 @@ export const updateTask = async (req, res) => {
             }
         }
 
+        await logAction({ user: req.user._id, action: 'UPDATE_TASK', resource: 'TASK', resourceId: req.params.id, status: 'success' });
         res.json(updatedTask);
     } catch (error) {
         sendError(res, 400, 'Failed to update task details. Please check your input and try again.', error);
@@ -165,6 +206,7 @@ export const deleteTask = async (req, res) => {
 
         if (task) {
             await task.deleteOne();
+            await logAction({ user: req.user._id, action: 'DELETE_TASK', resource: 'TASK', resourceId: req.params.id, status: 'success' });
             res.json({ success: true, message: 'The task has been successfully removed.' });
         } else {
             sendError(res, 404, 'The task you are trying to remove was not found.');

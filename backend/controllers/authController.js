@@ -4,10 +4,43 @@ import generateTokens from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import sendError from '../utils/errorResponse.js';
 import { createNotification } from './notificationController.js';
+import { registerSchema, loginSchema, profileUpdateSchema } from '../utils/validators.js';
+import { logAction } from '../utils/logger.js';
 
-// Random 4-digit OTP
+import crypto from 'crypto';
+
+// Random 4-digit OTP using cryptographically secure random numbers
 const generateOTP = () => {
-    return Math.floor(1000 + Math.random() * 9000).toString();
+    return crypto.randomInt(1000, 10000).toString();
+};
+
+const sendTokenResponse = (user, statusCode, res, message, req) => {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const tokens = generateTokens(user._id, ip);
+
+    const options = {
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        httpOnly: true,
+        secure: true, // Always true for prefix to work
+        sameSite: 'Strict',
+        path: '/', // Required for __Host-
+    };
+
+    res
+        .status(statusCode)
+        .cookie('__Host-accessToken', tokens.accessToken, options)
+        .cookie('__Host-refreshToken', tokens.refreshToken, options)
+        .json({
+            success: true,
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar,
+            role: user.role,
+            jobType: user.jobType,
+            workerProfile: user.workerProfile,
+            message
+        });
 };
 
 // @desc    Register a new user
@@ -15,16 +48,16 @@ const generateOTP = () => {
 // @access  Public
 export const register = async (req, res) => {
     try {
-        console.log('--- SIGNUP ATTEMPT START ---');
-        const { name, email, password, role, jobType } = req.body;
-        console.log('Request Body:', { name, email, role, jobType });
+        // Validation
+        const validation = registerSchema.safeParse(req.body);
+        if (!validation.success) {
+            return sendError(res, 400, validation.error.errors[0].message);
+        }
 
-        const file = req.file; // From Multer
-        console.log('File presence:', !!file);
-
-        console.log('Checking if user exists...');
+        const { name, email, password, role, jobType } = validation.data;
+        const file = req.file;
+        
         const userExists = await User.findOne({ email });
-        console.log('User check complete. Exists:', !!userExists);
 
         if (userExists) {
             return sendError(res, 400, 'An account with this email address already exists. Please try logging in instead.');
@@ -33,13 +66,13 @@ export const register = async (req, res) => {
         const otp = generateOTP();
         const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-        const userRole = role === 'admin' ? 'admin' : 'worker';
-        const defaultJobType = jobType || (userRole === 'admin' ? 'admin' : 'worker');
+        // SECURITY: All public registrations are 'worker'. Admins must be promoted.
+        const userRole = 'worker';
+        const defaultJobType = jobType || 'worker';
 
         const avatarUrl = file ? (file.url || file.path || file.secure_url) : '';
 
-        console.log('Creating User in DB...');
-        let user = await User.create({
+        const user = await User.create({
             name,
             email,
             password,
@@ -48,65 +81,43 @@ export const register = async (req, res) => {
             otpExpires,
             role: userRole,
             jobType: defaultJobType,
-            isVerified: true // Muted email logic for now - user is verified by default
+            isVerified: true // Muted email logic for now
         });
-        console.log('User created successfully. ID:', user._id);
 
-        // If worker, create worker profile
-        if (userRole === 'worker') {
-            const worker = await Worker.create({
-                name,
-                email,
-                role: user.jobType || 'Intern', // Use jobType for worker profile role
-                avatar: user.avatar,
-                userId: user._id
-            });
-            user.workerProfile = worker._id;
-            await user.save();
+        if (user) {
+            await logAction({ user: user._id, action: 'REGISTER', resource: 'USER', status: 'success' });
 
-            // Notify Admins
-            const admins = await User.find({ role: 'admin' });
-            for (const admin of admins) {
-                await createNotification({
-                    recipient: admin._id,
-                    sender: user._id,
-                    type: 'WORKER_SIGNUP',
-                    title: 'New Worker Registered',
-                    message: `${user.name} has signed up as a worker.`,
-                    link: '/workers'
+            // If worker, create worker profile
+            if (userRole === 'worker') {
+                const worker = await Worker.create({
+                    name,
+                    email,
+                    role: user.jobType || 'Intern',
+                    avatar: user.avatar,
+                    userId: user._id
                 });
+                user.workerProfile = worker._id;
+                await user.save();
+
+                // Notify Admins
+                const admins = await User.find({ role: 'admin' });
+                for (const adminUser of admins) {
+                    await createNotification({
+                        recipient: adminUser._id,
+                        sender: user._id,
+                        type: 'WORKER_SIGNUP',
+                        title: 'New Worker Registered',
+                        message: `${user.name} has signed up as a worker.`,
+                        link: '/workers'
+                    });
+                }
             }
+
+            sendTokenResponse(user, 201, res, 'Registration successful.', req);
+        } else {
+            sendError(res, 400, 'Invalid user data');
         }
-
-        // Send OTP Email
-        // const message = `Your verification code is: ${otp}`;
-        // try {
-        //     await sendEmail({
-        //         email: user.email,
-        //         subject: 'JNARD Email Verification',
-        //         message,
-        //     });
-        // } catch (error) {
-        //     console.error("Email send failed", error);
-        // }
-
-        // Muted email logic for now - reminder for next time
-        const tokens = generateTokens(user._id);
-
-        res.status(201).json({
-            success: true,
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar,
-            role: user.role,
-            jobType: user.jobType,
-            ...tokens,
-            message: 'Registration successful.'
-        });
-
     } catch (error) {
-        console.error('Register Error:', error);
         sendError(res, 500, 'Registration failed. Please try again.', error);
     }
 };
@@ -137,81 +148,69 @@ export const verifyEmail = async (req, res) => {
         user.otpExpires = undefined;
         await user.save();
 
-        // Generate tokens directly for seamless login
-        const tokens = generateTokens(user._id);
-
-        res.status(200).json({
-            success: true,
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar,
-            role: user.role,
-            jobType: user.jobType,
-            workerProfile: user.workerProfile,
-            ...tokens,
-            message: 'Your email has been verified successfully.'
-        });
-
+        sendTokenResponse(user, 200, res, 'Your email has been verified successfully.', req);
     } catch (error) {
         sendError(res, 500, 'We encountered an issue during verification. Please try again.', error);
     }
 };
 
-
-// @desc    Auth user & get token
-// @route   POST /api/auth/login
-// @access  Public
 export const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const validation = loginSchema.safeParse(req.body);
+        if (!validation.success) {
+            return sendError(res, 400, validation.error.errors[0].message);
+        }
+
+        const { email, password } = validation.data;
 
         const user = await User.findOne({ email });
 
-        if (user && (await user.matchPassword(password))) {
-            // Muted email logic for now - reminder for next time
-            // if (!user.isVerified) {
-            //     return sendError(res, 401, 'Please verify your email address before logging in.');
-            // }
-
-            const tokens = generateTokens(user._id);
-
-            res.role = user.role;
-            res.workerProfile = user.workerProfile;
-
-            // Sync: If user is worker but has no profile, create one now
-            if (user.role === 'worker' && !user.workerProfile) {
-                let worker = await Worker.findOne({ email: user.email });
-                if (!worker) {
-                    worker = await Worker.create({
-                        name: user.name,
-                        email: user.email,
-                        role: user.jobType || 'Intern',
-                        avatar: user.avatar,
-                        userId: user._id
-                    });
-                } else {
-                    worker.userId = user._id;
-                    await worker.save();
-                }
-                user.workerProfile = worker._id;
-                await user.save();
+        if (user) {
+            // Check if account is locked
+            if (user.lockUntil && user.lockUntil > Date.now()) {
+                await logAction({ user: user._id, action: 'LOGIN_LOCKED', resource: 'AUTH', status: 'failure', details: { email } });
+                return sendError(res, 401, 'This account is temporarily locked due to too many failed login attempts. Please try again in 15 minutes.');
             }
 
-            res.json({
-                success: true,
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                avatar: user.avatar,
-                role: user.role,
-                jobType: user.jobType,
-                workerProfile: user.workerProfile,
-                ...tokens
-            });
-        } else {
-            sendError(res, 401, 'The email or password you entered is incorrect. Please try again.');
+            if (await user.matchPassword(password)) {
+                // Reset failed attempts on success
+                user.loginAttempts = 0;
+                user.lockUntil = undefined;
+                
+                // Sync: If user is worker but has no profile, create one now
+                if (user.role === 'worker' && !user.workerProfile) {
+                    let worker = await Worker.findOne({ email: user.email });
+                    if (!worker) {
+                        worker = await Worker.create({
+                            name: user.name,
+                            email: user.email,
+                            role: user.jobType || 'Intern',
+                            avatar: user.avatar,
+                            userId: user._id
+                        });
+                    } else {
+                        worker.userId = user._id;
+                        await worker.save();
+                    }
+                    user.workerProfile = worker._id;
+                }
+                
+                await user.save();
+                await logAction({ user: user._id, action: 'LOGIN', resource: 'AUTH', status: 'success' });
+                sendTokenResponse(user, 200, res, 'Logged in successfully.', req);
+                return;
+            } else {
+                // Increment failed attempts
+                user.loginAttempts += 1;
+                if (user.loginAttempts >= 5) {
+                    user.lockUntil = Date.now() + 15 * 60 * 1000; // 15 mins
+                }
+                await user.save();
+            }
         }
+
+        await logAction({ action: 'LOGIN_FAILURE', resource: 'AUTH', status: 'failure', details: { email } });
+        sendError(res, 401, 'The email or password you entered is incorrect. Please try again.');
     } catch (error) {
         sendError(res, 500, null, error);
     }
@@ -309,10 +308,7 @@ export const resetPassword = async (req, res) => {
         user.isVerified = true; // Proof of email ownership
         await user.save();
 
-        res.status(200).json({
-            success: true,
-            message: 'Your password has been updated successfully.'
-        });
+        sendTokenResponse(user, 200, res, 'Your password has been updated successfully.', req);
 
     } catch (error) {
         sendError(res, 500, null, error);
@@ -324,36 +320,33 @@ export const resetPassword = async (req, res) => {
 // @access  Private
 export const updateProfile = async (req, res) => {
     try {
+        const validation = profileUpdateSchema.safeParse(req.body);
+        if (!validation.success) {
+            return sendError(res, 400, validation.error.errors[0].message);
+        }
+
         const user = await User.findById(req.user._id);
 
-        console.log('--- PROFILE UPDATE DEBUG ---');
-        console.log('User ID:', req.user._id);
-        console.log('File:', req.file);
-        console.log('Body:', req.body);
-
         if (user) {
-            console.log('Found user:', user.email);
-            user.name = req.body.name || user.name;
-            user.email = req.body.email || user.email;
+            user.name = validation.data.name || user.name;
+            user.email = validation.data.email || user.email;
 
             if (req.file) {
-                const newAvatar = req.file.url || req.file.path || req.file.secure_url;
-                console.log('New avatar from file:', newAvatar);
-                user.avatar = newAvatar;
+                user.avatar = req.file.url || req.file.path || req.file.secure_url;
             } else if (req.body.avatar) {
-                console.log('Avatar from body:', req.body.avatar);
                 user.avatar = req.body.avatar;
             }
 
-            if (req.body.jobType) {
-                user.jobType = req.body.jobType;
+            if (validation.data.jobType) {
+                user.jobType = validation.data.jobType;
             }
 
-            if (req.body.password) {
-                user.password = req.body.password;
+            if (validation.data.password) {
+                user.password = validation.data.password;
             }
 
             const updatedUser = await user.save();
+            await logAction({ user: user._id, action: 'UPDATE_PROFILE', resource: 'USER', status: 'success' });
 
             // Sync: If worker has a profile, update its avatar too
             if (updatedUser.workerProfile) {

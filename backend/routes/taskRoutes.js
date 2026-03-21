@@ -12,14 +12,14 @@ import { protect, admin } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.route('/')
-    .get(getTasks)
+    .get(protect, getTasks)
     .post(protect, admin, createTask);
 
 router.route('/project/:projectId')
-    .get(getTasksByProject);
+    .get(protect, getTasksByProject);
 
 router.route('/:id')
-    .get(getTaskById)
+    .get(protect, getTaskById)
     .put(protect, updateTask)
     .delete(protect, admin, deleteTask);
 

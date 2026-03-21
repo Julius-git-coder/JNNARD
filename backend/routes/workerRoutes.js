@@ -9,11 +9,13 @@ import {
 
 const router = express.Router();
 
-router.route('/').get(getWorkers).post(createWorker);
-router
-    .route('/:id')
-    .get(getWorkerById)
-    .put(updateWorker)
-    .delete(deleteWorker);
+router.route('/')
+    .get(protect, getWorkers)
+    .post(protect, admin, createWorker);
+
+router.route('/:id')
+    .get(protect, getWorkerById)
+    .put(protect, admin, updateWorker)
+    .delete(protect, admin, deleteWorker);
 
 export default router;

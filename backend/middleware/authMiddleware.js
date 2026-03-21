@@ -1,18 +1,37 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import sendError from '../utils/errorResponse.js';
+import TokenBlacklist from '../models/TokenBlacklist.js';
 
 export const protect = async (req, res, next) => {
     let token;
 
-    if (
+    if (req.cookies && req.cookies['__Host-accessToken']) {
+        token = req.cookies['__Host-accessToken'];
+    } else if (
         req.headers.authorization &&
         req.headers.authorization.startsWith('Bearer')
     ) {
-        try {
-            token = req.headers.authorization.split(' ')[1];
+        token = req.headers.authorization.split(' ')[1];
+    }
 
-            const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    if (token) {
+        try {
+            // Check if token is blacklisted
+            const isBlacklisted = await TokenBlacklist.findOne({ token });
+            if (isBlacklisted) {
+                return sendError(res, 401, 'This session has been revoked. Please sign in again.');
+            }
+
+            const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET, {
+                algorithms: ['HS256'],
+            });
+
+            // IP Pinning Verification
+            const currentIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            if (decoded.ip && decoded.ip !== currentIp) {
+                return sendError(res, 401, 'Session bound to a different IP address. Please sign in again.');
+            }
 
             req.user = await User.findById(decoded.id).select('-password').populate('workerProfile');
 

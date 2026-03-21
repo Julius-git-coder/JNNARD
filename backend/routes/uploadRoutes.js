@@ -4,6 +4,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import CloudinaryStorage from 'multer-storage-cloudinary';
 import https from 'https';
 import sendError from '../utils/errorResponse.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -24,12 +25,15 @@ const storage = new CloudinaryStorage({
     },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 // @desc    Upload a file
 // @route   POST /api/upload
-// @access  Public (for now)
-router.post('/', upload.single('file'), (req, res) => {
+// @access  Private (Authenticated)
+router.post('/', protect, upload.single('file'), (req, res) => {
     try {
         if (!req.file) {
             return sendError(res, 400, 'Please select a file to upload.');
@@ -46,10 +50,10 @@ router.post('/', upload.single('file'), (req, res) => {
 
 // @desc    Download a file (Proxy to bypass CORS/Browser preview)
 // @route   GET /api/upload/download
-// @access  Public
-router.get('/download', async (req, res) => {
+// @access  Private (Authenticated)
+router.get('/download', protect, async (req, res) => {
     const { url, name } = req.query;
-    console.log(`[Download Proxy] Request received for: ${name}`);
+
 
     if (!url) {
         return sendError(res, 400, 'File URL is required for download.');
@@ -60,7 +64,7 @@ router.get('/download', async (req, res) => {
             return sendError(res, 500, 'Too many redirects while fetching file.');
         }
 
-        console.log(`[Download Proxy] Fetching (Attempt ${attempts + 1}): ${targetUrl}`);
+
 
         const protocol = targetUrl.startsWith('https') ? https : null;
         if (!protocol) return sendError(res, 400, 'Invalid protocol in storage URL.');
@@ -75,13 +79,13 @@ router.get('/download', async (req, res) => {
         if (targetUrl.includes('cloudinary.com')) {
             const auth = Buffer.from(`${process.env.CLOUDINARY_API_KEY}:${process.env.CLOUDINARY_API_SECRET}`).toString('base64');
             options.headers['Authorization'] = `Basic ${auth}`;
-            console.log('[Download Proxy] Adding Cloudinary Basic Auth to request');
+
         }
 
         protocol.get(targetUrl, options, (response) => {
             // Handle redirects (Cloudinary often does this)
             if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                console.log(`[Download Proxy] Redirecting to: ${response.headers.location}`);
+
                 return downloadFile(response.headers.location, attempts + 1);
             }
 
@@ -120,7 +124,7 @@ router.get('/download', async (req, res) => {
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
             res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
 
-            console.log('[Download Proxy] Streaming file...');
+
             response.pipe(res);
         }).on('error', (error) => {
             console.error('[Download Proxy] Network error:', error.message);

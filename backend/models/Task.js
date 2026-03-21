@@ -32,8 +32,16 @@ const taskSchema = new mongoose.Schema(
             type: Date,
         },
         deliverables: {
-            type: String, // Description of what needs to be delivered
+            type: String, 
         },
+        history: [
+            {
+                action: String,
+                user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+                timestamp: { type: Date, default: Date.now },
+                details: mongoose.Schema.Types.Mixed
+            }
+        ],
     },
     {
         timestamps: true,

@@ -30,6 +30,7 @@ function VerifyContent() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, otp }),
+                credentials: 'include',
             });
 
             const result = await response.json();
@@ -38,18 +39,14 @@ function VerifyContent() {
                 throw new Error(result.message || 'Verification failed');
             }
 
-            // Save authentication data
-            if (result.accessToken) {
-                localStorage.setItem('accessToken', result.accessToken);
-                if (result.refreshToken) localStorage.setItem('refreshToken', result.refreshToken);
-                localStorage.setItem('user', JSON.stringify({
-                    name: result.name,
-                    email: result.email,
-                    avatar: result.avatar,
-                    role: result.role,
-                    workerProfile: result.workerProfile
-                }));
-            }
+            // Save non-sensitive user info for UI state
+            localStorage.setItem('user', JSON.stringify({
+                name: result.name,
+                email: result.email,
+                avatar: result.avatar,
+                role: result.role,
+                workerProfile: result.workerProfile
+            }));
 
             if (mode === 'reset') {
                 window.location.href = `/reset-password?email=${encodeURIComponent(email)}&otp=${otp}`;

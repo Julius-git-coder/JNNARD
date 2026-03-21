@@ -4,9 +4,11 @@
  */
 
 export const sendError = (res, statusCode, message, error = null) => {
-    // Log the actual error for server-side debugging
-    if (error) {
-        console.error(`[Error ${statusCode}]:`, error.stack || error);
+    if (error && process.env.NODE_ENV !== 'production') {
+        console.error(`[SEC-ERR] ${statusCode} - ${message || (error ? error.message : '')}`);
+        console.error(error.stack);
+    } else if (error) {
+        console.error(`[SEC-ERR] ${statusCode} - INTERNAL_LOG_MASKED`);
     }
 
     // Determine the user-facing message

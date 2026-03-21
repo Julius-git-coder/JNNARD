@@ -8,7 +8,17 @@ import sendError from '../utils/errorResponse.js';
 // @access  Public
 export const getPerformanceRecords = async (req, res) => {
     try {
-        const records = await Performance.find({})
+        let query = {};
+
+        // If not admin, only show records for this worker
+        if (req.user.role !== 'admin') {
+            if (!req.user.workerProfile) {
+                return res.json([]); // Return empty if no profile
+            }
+            query = { worker: req.user.workerProfile._id };
+        }
+
+        const records = await Performance.find(query)
             .populate('worker', 'name role avatar')
             .populate('project', 'title')
             .populate('task', 'title');
@@ -23,6 +33,13 @@ export const getPerformanceRecords = async (req, res) => {
 // @access  Public
 export const getPerformanceByWorker = async (req, res) => {
     try {
+        // IDOR Check: Ensure user is admin or the worker themselves
+        if (req.user.role !== 'admin') {
+            if (!req.user.workerProfile || req.user.workerProfile._id.toString() !== req.params.workerId) {
+                return sendError(res, 403, 'Permission denied. You can only view your own performance records.');
+            }
+        }
+
         const records = await Performance.find({ worker: req.params.workerId })
             .populate('worker', 'name role avatar')
             .populate('project', 'title')

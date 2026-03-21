@@ -56,6 +56,14 @@ const projectSchema = new mongoose.Schema(
                 },
             },
         ],
+        history: [
+            {
+                action: String,
+                user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+                timestamp: { type: Date, default: Date.now },
+                details: mongoose.Schema.Types.Mixed
+            }
+        ],
     },
     {
         timestamps: true,

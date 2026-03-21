@@ -2,13 +2,25 @@ import Project from '../models/Project.js';
 import Worker from '../models/Worker.js';
 import { createNotification } from './notificationController.js';
 import sendError from '../utils/errorResponse.js';
+import { logAction } from '../utils/logger.js';
+import { projectSchema } from '../utils/validators.js';
 
 // @desc    Get all projects
 // @route   GET /api/projects
 // @access  Public
 export const getProjects = async (req, res) => {
     try {
-        const projects = await Project.find({}).populate('members', 'name role avatar');
+        let query = {};
+
+        // If not admin, only show projects where the worker is a member
+        if (req.user.role !== 'admin') {
+            if (!req.user.workerProfile) {
+                return res.json([]);
+            }
+            query = { members: req.user.workerProfile._id };
+        }
+
+        const projects = await Project.find(query).populate('members', 'name role avatar');
         res.json(projects);
     } catch (error) {
         sendError(res, 500, 'Unable to retrieve projects at this time.', error);
@@ -21,11 +33,20 @@ export const getProjects = async (req, res) => {
 export const getProjectById = async (req, res) => {
     try {
         const project = await Project.findById(req.params.id).populate('members', 'name role avatar');
-        if (project) {
-            res.json(project);
-        } else {
-            sendError(res, 404, 'The requested project could not be found.');
+        
+        if (!project) {
+            return sendError(res, 404, 'The requested project could not be found.');
         }
+
+        // RBAC Check: Ensure user is admin or a member of the project
+        if (req.user.role !== 'admin') {
+            const isMember = project.members.some(m => m._id.toString() === req.user.workerProfile?._id.toString());
+            if (!isMember) {
+                return sendError(res, 403, 'Permission denied. You are not a member of this project.');
+            }
+        }
+
+        res.json(project);
     } catch (error) {
         sendError(res, 500, null, error);
     }
@@ -35,9 +56,13 @@ export const getProjectById = async (req, res) => {
 // @route   POST /api/projects
 // @access  Admin
 export const createProject = async (req, res) => {
-    const { title, description, status, startDate, endDate, members } = req.body;
-
     try {
+        const validation = projectSchema.safeParse(req.body);
+        if (!validation.success) {
+            return sendError(res, 400, validation.error.errors[0].message);
+        }
+
+        const { title, description, status, startDate, endDate, members } = validation.data;
         const project = await Project.create({
             title,
             description,
@@ -63,6 +88,7 @@ export const createProject = async (req, res) => {
                 }
             }
         }
+        await logAction({ user: req.user._id, action: 'CREATE_PROJECT', resource: 'PROJECT', resourceId: project._id, status: 'success' });
         res.status(201).json(project);
     } catch (error) {
         sendError(res, 400, 'Failed to create project. Please verify that all required fields are correctly filled.', error);
@@ -74,6 +100,11 @@ export const createProject = async (req, res) => {
 // @access  Admin
 export const updateProject = async (req, res) => {
     try {
+        const validation = projectSchema.partial().safeParse(req.body);
+        if (!validation.success) {
+            return sendError(res, 400, validation.error.errors[0].message);
+        }
+
         const project = await Project.findById(req.params.id);
 
         if (project) {
@@ -117,6 +148,7 @@ export const updateProject = async (req, res) => {
                 }
             }
 
+            await logAction({ user: req.user._id, action: 'UPDATE_PROJECT', resource: 'PROJECT', resourceId: req.params.id, status: 'success' });
             res.json(populatedProject);
         } else {
             sendError(res, 404, 'The project you are attempting to update was not found.');
@@ -135,6 +167,7 @@ export const deleteProject = async (req, res) => {
 
         if (project) {
             await project.deleteOne();
+            await logAction({ user: req.user._id, action: 'DELETE_PROJECT', resource: 'PROJECT', resourceId: req.params.id, status: 'success' });
             res.json({ success: true, message: 'The project has been successfully removed.' });
         } else {
             sendError(res, 404, 'The project you are trying to remove was not found.');

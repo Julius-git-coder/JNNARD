@@ -53,6 +53,7 @@ export default function SignupPage() {
                 method: 'POST',
                 // Fetch automatically sets the correct Content-Type for FormData
                 body: data,
+                credentials: 'include',
             });
 
             const result = await response.json();
@@ -63,18 +64,14 @@ export default function SignupPage() {
 
             handleSuccess("Signup successful!");
 
-            // Save authentication data
-            if (result.accessToken) {
-                localStorage.setItem('accessToken', result.accessToken);
-                if (result.refreshToken) localStorage.setItem('refreshToken', result.refreshToken);
-                localStorage.setItem('user', JSON.stringify({
-                    name: result.name,
-                    email: result.email,
-                    avatar: result.avatar,
-                    role: result.role,
-                    workerProfile: result.workerProfile
-                }));
-            }
+            // Save non-sensitive user info for UI state
+            localStorage.setItem('user', JSON.stringify({
+                name: result.name,
+                email: result.email,
+                avatar: result.avatar,
+                role: result.role,
+                workerProfile: result.workerProfile
+            }));
 
             // Redirect directly based on role
             if (result.role === 'worker') {
