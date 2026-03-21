@@ -96,16 +96,17 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess, recordT
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl">
-                <DialogHeader className="px-6 pt-6 pb-4 bg-gray-50 dark:bg-gray-900/50 border-b">
+            <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh]">
+                <DialogHeader className="px-6 pt-6 pb-4 bg-gray-50 dark:bg-gray-900/50 border-b shrink-0">
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
                         <ClipboardCheck className="h-5 w-5 text-blue-600" />
                         {recordToEdit ? 'Edit Performance Review' : 'New Performance Review'}
                     </DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                    <div className="space-y-4">
+                <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden max-h-full">
+                    <div className="p-6 space-y-5 overflow-y-auto">
+                        <div className="space-y-4">
                         {/* Assignments Section */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -248,8 +249,9 @@ export function UpdatePerformanceDialog({ open, onOpenChange, onSuccess, recordT
                             />
                         </div>
                     </div>
+                    </div>
 
-                    <DialogFooter className="pt-2">
+                    <DialogFooter className="p-6 pt-4 border-t bg-gray-50/50 dark:bg-gray-900/50 shrink-0">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="text-gray-500">
                             Cancel
                         </Button>
