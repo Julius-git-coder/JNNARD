@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import sendError from '../utils/errorResponse.js';
 
 /**
@@ -35,6 +36,7 @@ export const getSecurityStatus = async (req, res) => {
                 infrastructure: {
                     nodeEnv: process.env.NODE_ENV || 'development',
                     dbSanity: 'verified',
+                    tokenPruningIndex: mongoose.connection.models.TokenBlacklist ? 'active' : 'unknown'
                 }
             }
         };
