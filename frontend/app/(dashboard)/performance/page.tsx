@@ -71,13 +71,13 @@ export default function PerformancePage() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Performance Overview</h1>
-                <div className="flex items-center gap-4 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div className="relative w-full sm:w-64">
                                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
                                 <Input
-                                    className="pl-9 h-10 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800"
+                                    className="pl-9 h-10 w-full bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800"
                                     placeholder="Search by worker or role..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -89,7 +89,7 @@ export default function PerformancePage() {
                         </TooltipContent>
                     </Tooltip>
                     <Button
-                        className="bg-blue-600 hover:bg-blue-700 shrink-0"
+                        className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto shrink-0"
                         onClick={handleAdd}
                         tooltip="Record new performance"
                     >
