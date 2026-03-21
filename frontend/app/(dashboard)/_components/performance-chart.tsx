@@ -38,11 +38,11 @@ export function PerformanceChart({ isLoading: parentLoading }: { isLoading?: boo
 
     return (
         <Card className="h-full border-none shadow-sm flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between pb-8">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-8 gap-4 sm:gap-0">
                 <CardTitle className="text-lg font-bold">Performance Trends</CardTitle>
                 <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">Last 7 Records</Badge>
             </CardHeader>
-            <CardContent className="flex-1 w-full pl-0 flex flex-col">
+            <CardContent className="flex-1 w-full pl-0 flex flex-col relative">
                 <div className="flex items-center justify-end gap-4 mb-4 pr-4">
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                         <span className="block w-2.5 h-2.5 rounded-full bg-orange-400"></span> Actual %
@@ -52,10 +52,9 @@ export function PerformanceChart({ isLoading: parentLoading }: { isLoading?: boo
                     </div>
                 </div>
 
-                <div className="flex-1 w-full min-h-0">
-
-                    <ResponsiveContainer width="100%" height="100%">
-                        {chartData.length > 0 ? (
+                <div className="flex-1 w-full min-h-0 relative">
+                    {chartData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                                 <XAxis
@@ -92,12 +91,12 @@ export function PerformanceChart({ isLoading: parentLoading }: { isLoading?: boo
                                     dot={false}
                                 />
                             </LineChart>
-                        ) : (
-                            <div className="h-full flex items-center justify-center text-gray-400 italic">
-                                No performance data recorded yet.
-                            </div>
-                        )}
-                    </ResponsiveContainer>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 italic text-center px-4">
+                            No performance data recorded yet.
+                        </div>
+                    )}
                 </div>
             </CardContent>
         </Card>
