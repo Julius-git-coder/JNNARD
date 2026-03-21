@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Worker from '../models/Worker.js';
+import bcrypt from 'bcryptjs';
 import generateTokens from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import sendError from '../utils/errorResponse.js';
@@ -163,7 +164,7 @@ export const login = async (req, res) => {
 
         const { email, password } = validation.data;
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).select('+password');
 
         if (user) {
             // Check if account is locked
@@ -206,7 +207,15 @@ export const login = async (req, res) => {
                     user.lockUntil = Date.now() + 15 * 60 * 1000; // 15 mins
                 }
                 await user.save();
+                await logAction({ user: user._id, action: 'LOGIN_FAILED', resource: 'AUTH', status: 'failure', details: { email } });
+                return sendError(res, 401, 'Invalid credentials');
             }
+        } else {
+            // Anti-enumeration timing defense: perform dummy check to match valid user timing
+            const dummyHash = '$2b$12$K8p5O6.mN6d6S6B8S8S8Su6u6u6u6u6u6u6u6u6u6u6u6u6u6u6u';
+            await bcrypt.compare(password, dummyHash);
+            await logAction({ action: 'LOGIN_FAILURE', resource: 'AUTH', status: 'failure', details: { email, reason: 'user_not_found' } });
+            return sendError(res, 401, 'Invalid credentials');
         }
 
         await logAction({ action: 'LOGIN_FAILURE', resource: 'AUTH', status: 'failure', details: { email } });
