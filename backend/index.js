@@ -24,6 +24,7 @@ import { queryGuard } from './middleware/queryGuard.js';
 import { getSecurityStatus } from './controllers/securityController.js';
 
 const app = express();
+app.disable('x-powered-by'); // Framework-level technology concealment
 app.set('etag', false); // Disable Etags to prevent cache-timing attacks
 const PORT = process.env.PORT || 5000;
 
@@ -182,6 +183,12 @@ mongoose.connection.on('connected', () => console.log('Mongoose default connecti
 mongoose.connection.on('error', (err) => console.log('Mongoose default connection error: ' + err));
 mongoose.connection.on('disconnected', () => console.log('Mongoose default connection disconnected'));
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} (ES Modules)`);
 });
+
+// Omega Singularity: Physical connection phase-lock
+server.timeout = 30000; // 30s absolute timeout
+server.keepAliveTimeout = 5000; // 5s idle keep-alive
+server.headersTimeout = 6000; // 6s headers timeout
+
